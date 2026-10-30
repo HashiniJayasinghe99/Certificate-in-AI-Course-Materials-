@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAI04 - Session 8: Build Your Own AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#38bdf8',
+                            500: '#06b6d4',
+                            600: '#0284c7',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #080c14;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.20) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.22) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.18) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.18) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.70);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.70);
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(56, 189, 248, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+            backdrop-filter: blur(8px);
+        }
+        .glass-input:focus {
+            border-color: #38bdf8;
+            outline: none;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .slide-enter {
+            opacity: 0;
+            transform: scale(0.97) translateY(10px);
+            filter: blur(4px);
+        }
+        .slide-active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            border-left: 3px solid #38bdf8;
+            color: #ffffff !important;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.5); }
+    </style>
+</head>
+<body class="text-slate-100 font-sans h-full overflow-hidden flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <header class="w-full glass-panel border-b border-white/10 px-6 py-3 flex justify-between items-center z-50 relative shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="sidebar-toggle" onclick="toggleSidebar()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition-all flex items-center justify-center" title="Toggle Navigation">
+                <i class="fa-solid fa-bars-staggered text-lg"></i>
+            </button>
+            <div class="bg-gradient-to-tr from-cyan-500 via-blue-500 to-indigo-500 p-2 rounded-xl shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-base"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-xs md:text-sm text-white tracking-wide flex items-center gap-2">
+                    CAI04: Session 8 • Build Your Own AI Assistant
+                </h1>
+                <p class="text-[11px] text-slate-400">Lecturer: Mr. Sanchuka Kavinda • Master Class Deck</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 rounded-full text-xs font-semibold glass-panel border border-cyan-500/30 text-cyan-300">
+                Session 8 (2 Hours)
+            </div>
+            <div class="glass-panel border border-white/10 px-3 py-1 rounded-full text-xs font-mono text-cyan-400">
+                <span id="current-slide-num" class="text-white font-bold">1</span> / <span id="total-slide-num">20</span>
+            </div>
+            <button onclick="toggleFullScreen()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition" title="Toggle Fullscreen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full h-[2px] bg-white/5">
+            <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-500 h-full w-0 transition-all duration-500 ease-out"></div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+        <aside id="sidebar" class="w-80 glass-panel border-r border-white/10 flex flex-col justify-between transition-all duration-300 ease-in-out z-40 shrink-0">
+            <div class="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-130px)]">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 flex justify-between items-center">
+                    <span>Session 8 Curriculum</span>
+                    <span class="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">20 Slides</span>
+                </div>
+
+                <div class="space-y-1">
+                    <button id="nav-item-0" onclick="jumpToSlide(0)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-compass w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">01. Session 8 Overview</span>
+                    </button>
+                    <button id="nav-item-1" onclick="jumpToSlide(1)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-list-check w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">02. Plan and Take-home</span>
+                    </button>
+                    <button id="nav-item-2" onclick="jumpToSlide(2)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-rotate-left w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">03. Recap and Setup</span>
+                    </button>
+                    <button id="nav-item-3" onclick="jumpToSlide(3)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-user-tie w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">04. What Is an Assistant?</span>
+                    </button>
+                    <button id="nav-item-4" onclick="jumpToSlide(4)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-folder-tree w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">05. Claude Projects</span>
+                    </button>
+                    <button id="nav-item-5" onclick="jumpToSlide(5)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-pen-ruler w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">06. Writing Instructions</span>
+                    </button>
+                    <button id="nav-item-6" onclick="jumpToSlide(6)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-vial w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">07. Test and Improve</span>
+                    </button>
+                    <button id="nav-item-7" onclick="jumpToSlide(7)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-shield-halved w-4 text-center text-rose-400"></i>
+                        <span class="truncate font-medium">08. Safe Knowledge Files</span>
+                    </button>
+                    <button id="nav-item-8" onclick="jumpToSlide(8)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-display w-4 text-center text-yellow-400"></i>
+                        <span class="truncate font-medium">09. Lecturer Demo</span>
+                    </button>
+                    <button id="nav-item-9" onclick="jumpToSlide(9)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-briefcase w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">10. Lab: The Scenario</span>
+                    </button>
+                    <button id="nav-item-10" onclick="jumpToSlide(10)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-folder-plus w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">11. Create the Project</span>
+                    </button>
+                    <button id="nav-item-11" onclick="jumpToSlide(11)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-book w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">12. The Company Guide</span>
+                    </button>
+                    <button id="nav-item-12" onclick="jumpToSlide(12)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-1 w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">13. Prompt 1: Draft Instructions</span>
+                    </button>
+                    <button id="nav-item-13" onclick="jumpToSlide(13)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-floppy-disk w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">14. Save the Instructions</span>
+                    </button>
+                    <button id="nav-item-14" onclick="jumpToSlide(14)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-2 w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">15. Prompts 2-4: Test It</span>
+                    </button>
+                    <button id="nav-item-15" onclick="jumpToSlide(15)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-5 w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">16. Prompt 5: Improve It</span>
+                    </button>
+                    <button id="nav-item-16" onclick="jumpToSlide(16)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-6 w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">17. Apply and Retest</span>
+                    </button>
+                    <button id="nav-item-17" onclick="jumpToSlide(17)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-7 w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">18. Prompts 7-8: Partner Test</span>
+                    </button>
+                    <button id="nav-item-18" onclick="jumpToSlide(18)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-folder-open w-4 text-center text-yellow-400"></i>
+                        <span class="truncate font-medium">19. Take-home Guide</span>
+                    </button>
+                    <button id="nav-item-19" onclick="jumpToSlide(19)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-flag-checkered w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">20. Recap and Next</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-white/10 glass-card m-3 rounded-xl text-center shrink-0">
+                <p class="text-[11px] text-slate-300 font-semibold">CAI04 - Session 8</p>
+                <div class="flex justify-center items-center gap-2 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="text-[10px] text-cyan-400 font-medium">Build Your Own AI Assistant</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 relative p-4 md:p-8 flex items-center justify-center overflow-y-auto pb-16">
+
+            <!-- SLIDE 0: Overview and agenda -->
+            <section id="slide-0" class="slide-active w-full max-w-5xl space-y-6">
+                <div class="text-center space-y-3 max-w-3xl mx-auto">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold glass-panel border border-cyan-400/30 text-cyan-300 shadow-lg">
+                        <i class="fa-solid fa-compass"></i> Session 8 • 2 Hours
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-slate-300 leading-tight">
+                        Build Your Own AI Assistant
+                    </h2>
+                    <p class="text-slate-300 text-xs md:text-sm leading-relaxed max-w-2xl mx-auto">
+                        Turn a good prompt into a saved assistant that follows your rules every time.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-cyan-400 relative overflow-hidden group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full glass-panel border border-cyan-500/30 text-cyan-300">Part 1</span>
+                                <h3 class="text-lg font-bold text-white mt-2">Understand Assistants</h3>
+                            </div>
+                            <i class="fa-solid fa-user-tie text-cyan-400/30 text-3xl group-hover:text-cyan-400 transition"></i>
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> What is an AI assistant?</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Claude Projects: instructions and knowledge</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Writing good instructions</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-indigo-400 relative overflow-hidden group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full glass-panel border border-indigo-500/30 text-indigo-300">Part 2</span>
+                                <h3 class="text-lg font-bold text-white mt-2">Build and Test</h3>
+                            </div>
+                            <i class="fa-solid fa-vial text-indigo-400/30 text-3xl group-hover:text-indigo-400 transition"></i>
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Create a Customer Reply Assistant</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Test it with real messages</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Improve and save your one-page guide</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 1: Plan for today -->
+            <section id="slide-1" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Session 8 • Topic 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Today's plan</h2>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-slate-400">
+                        <div class="w-20 text-xs font-mono text-slate-400 shrink-0">0-10 min</div>
+                        <div class="text-sm font-semibold text-white">Recap and setup</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-cyan-400">
+                        <div class="w-20 text-xs font-mono text-cyan-400 shrink-0">10-35 min</div>
+                        <div class="text-sm font-semibold text-white">Concepts (5 short topics)</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-indigo-400">
+                        <div class="w-20 text-xs font-mono text-indigo-400 shrink-0">35-100 min</div>
+                        <div class="text-sm font-semibold text-white">Hands-on lab (build, test, improve)</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-purple-400">
+                        <div class="w-20 text-xs font-mono text-purple-400 shrink-0">100-112 min</div>
+                        <div class="text-sm font-semibold text-white">Write your one-page guide</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-emerald-400">
+                        <div class="w-20 text-xs font-mono text-emerald-400 shrink-0">112-120 min</div>
+                        <div class="text-sm font-semibold text-white">Recap</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl mt-6 flex items-start gap-4 border border-yellow-500/30 bg-yellow-500/5">
+                    <div class="p-2 bg-yellow-500/20 text-yellow-400 rounded-lg"><i class="fa-solid fa-gift"></i></div>
+                    <div>
+                        <h4 class="text-sm font-bold text-yellow-400 mb-1">Take-home product</h4>
+                        <p class="text-xs text-slate-300">A working AI assistant in your Claude account, and a one-page guide that explains how to use it.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: Recap and Setup -->
+            <section id="slide-2" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Session 8 • Recap</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">From one-off prompts to saved assistants</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-white/20 text-slate-300">
+                        <i class="fa-solid fa-location-dot mr-1 text-purple-400"></i> claude.ai
+                    </span>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 py-6">
+                    <div class="glass-card p-6 rounded-2xl w-full md:w-5/12 flex flex-col items-center text-center space-y-3 z-10 border border-slate-700/50">
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-xl text-slate-400 mb-2 border border-slate-600/50">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg">Session 7</h3>
+                        <p class="text-xs text-slate-300">You wrote an agent prompt: goal, steps, checks and format. You typed it fresh every time.</p>
+                    </div>
+
+                    <div class="hidden md:flex items-center justify-center w-2/12 z-0">
+                        <i class="fa-solid fa-arrow-right text-purple-500 text-2xl"></i>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl w-full md:w-5/12 flex flex-col items-center text-center space-y-3 border border-purple-500/40 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.15)] z-10">
+                        <div class="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-xl text-white mb-2 shadow-lg shadow-purple-500/40">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg">Today</h3>
+                        <p class="text-xs text-purple-200">You save the rules once, and Claude follows them in every new chat.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl flex items-start gap-4 border-l-4 border-l-purple-500">
+                    <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold shrink-0 border border-purple-500/30"><i class="fa-solid fa-gear"></i></div>
+                    <div>
+                        <strong class="text-sm text-purple-300 block mb-1">Setup Note</strong>
+                        <p class="text-sm text-slate-200">Open claude.ai, sign in, and check that you can see Projects in the left menu. Do not start a project yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: What is an AI assistant? -->
+            <section id="slide-3" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Concept 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">What is an AI assistant?</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Analogy</h3>
+                            <i class="fa-solid fa-user-tie text-slate-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300 italic flex-1">"A new employee with a job description and a staff handbook. You explain the job once, and they follow it every day."</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-t-2 border-t-pink-400">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Technical Reality</h3>
+                            <i class="fa-solid fa-microchip text-pink-400"></i>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="inline-block px-2 py-1 rounded bg-pink-900/30 text-[10px] font-mono text-pink-300 border border-pink-500/30 mb-1">System prompt (custom instructions)</span>
+                                <p class="text-[11px] text-slate-300">The standing rules the AI reads before every chat.</p>
+                            </div>
+                            <div>
+                                <span class="inline-block px-2 py-1 rounded bg-pink-900/30 text-[10px] font-mono text-pink-300 border border-pink-500/30 mb-1">Knowledge base</span>
+                                <p class="text-[11px] text-slate-300">The documents the AI can refer to.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl flex items-center justify-between text-sm border border-white/10 bg-slate-900/50">
+                    <div class="flex-1 text-center border-r border-white/10 pr-4">
+                        <span class="text-slate-400 block text-xs mb-1">One-off prompt</span>
+                        <strong class="text-white">You retype the brief every time.</strong>
+                    </div>
+                    <div class="flex-1 text-center pl-4">
+                        <span class="text-pink-400 block text-xs mb-1">Assistant</span>
+                        <strong class="text-pink-100">You save the brief once.</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: Claude Projects -->
+            <section id="slide-4" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Concept 2</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Claude Projects: your assistant's workspace</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-3 border-l-4 border-l-amber-400">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-white">Instructions</h3>
+                            <i class="fa-solid fa-list-ol text-amber-400 text-xl"></i>
+                        </div>
+                        <p class="text-sm text-slate-300">"How the assistant should behave: role, rules, tone, format."</p>
+                        <div class="mt-2">
+                            <span class="text-[10px] font-mono text-amber-300 bg-amber-900/20 px-2 py-1 rounded border border-amber-500/30">Term: custom instructions</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-3 border-l-4 border-l-cyan-400">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-white">Knowledge</h3>
+                            <i class="fa-solid fa-file-pdf text-cyan-400 text-xl"></i>
+                        </div>
+                        <p class="text-sm text-slate-300">"Files it can use: policies, templates, FAQs."</p>
+                        <div class="mt-2">
+                            <span class="text-[10px] font-mono text-cyan-300 bg-cyan-900/20 px-2 py-1 rounded border border-cyan-500/30">Term: context (the information the AI works from)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-amber-900/10 border border-amber-500/20 text-center shadow-[0_0_15px_rgba(251,191,36,0.1)]">
+                    <p class="text-sm font-semibold text-amber-100">Every new chat inside the Project starts with the same instructions and files.</p>
+                </div>
+
+                <p class="text-xs text-center text-slate-400 italic">
+                    Note: Projects are included in your free account.
+                </p>
+            </section>
+
+            <!-- SLIDE 5: Writing Instructions -->
+            <section id="slide-5" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Concept 3</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Five parts of good instructions</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-cyan-300 bg-cyan-900/30 px-1.5 py-0.5 rounded w-fit border border-cyan-500/30">Role</span>
+                        <h3 class="font-bold text-white text-sm">Role</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">"Who the assistant is."</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-rose-300 bg-rose-900/30 px-1.5 py-0.5 rounded w-fit border border-rose-500/30">Anti-goals</span>
+                        <h3 class="font-bold text-white text-sm">Rules</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">"What it must and must not do."</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-amber-300 bg-amber-900/30 px-1.5 py-0.5 rounded w-fit border border-amber-500/30">Tone</span>
+                        <h3 class="font-bold text-white text-sm">Tone</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">"How it sounds."</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-emerald-300 bg-emerald-900/30 px-1.5 py-0.5 rounded w-fit border border-emerald-500/30">Format</span>
+                        <h3 class="font-bold text-white text-sm">Format</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">"How replies are laid out and how long they are."</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col border-t-2 border-t-purple-400">
+                        <span class="text-[9px] font-mono text-purple-300 bg-purple-900/30 px-1.5 py-0.5 rounded w-fit border border-purple-500/30">Anti-goals</span>
+                        <h3 class="font-bold text-white text-sm">When unsure</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">"What to do instead of guessing."</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl space-y-2 mt-4">
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Example</span>
+                    <div class="p-4 bg-slate-900/80 rounded-xl font-mono text-sm text-slate-300 leading-relaxed border border-white/5">
+                        "You are a customer care assistant. Follow the uploaded guide. Reply in under 120 words. If unsure, say a team member will confirm within 24 hours."
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: Test and Improve -->
+            <section id="slide-6" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Concept 4</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Test it like a new hire on probation</h2>
+                </div>
+                
+                <p class="text-sm text-slate-300 italic mb-2 border-l-2 border-emerald-400 pl-3">"You would not let a new hire answer customers on day one without checking their work."</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="glass-card p-4 rounded-xl flex flex-col border-t border-t-slate-500">
+                        <h3 class="font-bold text-white text-sm mb-1">Normal</h3>
+                        <p class="text-xs text-slate-300">"A typical request."</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex flex-col border-t border-t-yellow-500">
+                        <h3 class="font-bold text-white text-sm mb-1">Tricky</h3>
+                        <p class="text-xs text-slate-300">"A request that needs a policy to answer correctly."</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex flex-col border-t border-t-rose-500">
+                        <h3 class="font-bold text-white text-sm mb-1">Unreasonable</h3>
+                        <p class="text-xs text-slate-300">"A request the assistant should politely refuse."</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-emerald-900/20 rounded-xl border border-emerald-500/30 flex items-center justify-center text-sm font-semibold text-emerald-100 gap-3 overflow-x-auto whitespace-nowrap">
+                    <span>Test</span>
+                    <i class="fa-solid fa-arrow-right text-emerald-500 text-xs"></i>
+                    <span>Find the weakness</span>
+                    <i class="fa-solid fa-arrow-right text-emerald-500 text-xs"></i>
+                    <span>Change one thing</span>
+                    <i class="fa-solid fa-arrow-right text-emerald-500 text-xs"></i>
+                    <span>Test again</span>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 text-[10px] font-mono text-slate-400 mt-4 justify-center">
+                    <span class="px-2 py-1.5 rounded bg-white/5 border border-white/10 flex items-center gap-1.5"><strong class="text-white">edge case</strong> (an unusual situation that can break the rules)</span>
+                    <span class="px-2 py-1.5 rounded bg-white/5 border border-white/10 flex items-center gap-1.5"><strong class="text-white">iteration</strong> (improving step by step)</span>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Safe Knowledge Files -->
+            <section id="slide-7" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Concept 5</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">What to upload, and what never to</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-4 border-t-emerald-500 relative overflow-hidden bg-emerald-900/5">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-center gap-3 relative z-10">
+                            <i class="fa-solid fa-shield-check text-2xl text-emerald-400"></i>
+                            <h3 class="font-bold text-lg text-white">Safe to upload</h3>
+                        </div>
+                        <p class="text-sm text-slate-200 relative z-10 leading-relaxed">"Style guides, public policies, FAQs, templates, sample replies."</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-4 border-t-rose-500 relative overflow-hidden bg-rose-900/5">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-rose-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-center gap-3 relative z-10">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl text-rose-400"></i>
+                            <h3 class="font-bold text-lg text-white">Never upload</h3>
+                        </div>
+                        <p class="text-sm text-slate-200 relative z-10 leading-relaxed">"Passwords, customer personal details, private contracts, anything confidential."</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-600 text-center text-slate-200 font-semibold mt-4 shadow-lg flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-user-shield text-slate-400"></i> You check every reply before it is sent. An assistant can still make mistakes.
+                </div>
+            </section>
+
+            <!-- SLIDE 8: Live demo -->
+            <section id="slide-8" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Lecturer Demo</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Watch: a finished assistant</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center shrink-0 border border-yellow-500/30">
+                            <i class="fa-solid fa-gears"></i>
+                        </div>
+                        <p class="text-sm text-slate-200 mt-1">The lecturer shows a Customer Reply Assistant, built from a style guide and short instructions.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4 border-t-2 border-t-yellow-400">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                            <i class="fa-solid fa-message"></i>
+                        </div>
+                        <p class="text-sm text-slate-200 mt-1">One customer message goes in. A reply in the company's tone comes out.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl text-center space-y-2 mt-4 bg-yellow-900/10 border border-yellow-500/20">
+                    <p class="text-sm font-semibold text-white"><i class="fa-regular fa-eye mr-2 text-yellow-400"></i> What to notice: Tone, length, policy used, and the sign-off.</p>
+                    <p class="text-xs text-rose-400 font-medium">Watch only. Do not type yet.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: Lab scenario -->
+            <section id="slide-9" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Hands-on Lab</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Your scenario</h2>
+                </div>
+
+                <div class="glass-card p-4 rounded-xl text-sm text-slate-200 border-l-4 border-emerald-400 leading-relaxed bg-emerald-900/20">
+                    <i class="fa-solid fa-headset mr-2 text-emerald-400"></i> You work in Customer Care at Ceylon Fresh Foods (a fictional company). You will build an assistant that drafts replies to customer messages, following the company guide.
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-cyan-400"></i> Rules for the lab</h3>
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Use at most 8 prompts</span>
+                    </div>
+                    <ul class="text-sm text-slate-300 space-y-3">
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-cyan-500 mt-1"></i> Plan for 8 prompts in total.</li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-cyan-500 mt-1"></i> Open a new chat inside your Project for each test message.</li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-cyan-500 mt-1"></i> Use the Copy button. Do not retype.</li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-cyan-500 mt-1"></i> Read each reply before moving on.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: Step 1: Create the Project -->
+            <section id="slide-10" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Session 8 • Step 1</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Create the Project</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-white/20 text-slate-300">
+                        <i class="fa-solid fa-location-dot mr-1 text-cyan-400"></i> Claude • Projects
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold shrink-0 border border-cyan-500/30">1</div>
+                        <p class="text-sm text-slate-200 mt-1">In the left menu, click Projects, then create a new project.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold shrink-0 border border-cyan-500/30">2</div>
+                        <p class="text-sm text-slate-200 mt-1">Name it "Customer Reply Assistant".</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4 sm:col-span-2">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold shrink-0 border border-cyan-500/30">3</div>
+                        <p class="text-sm text-slate-200 mt-1">Add the file Customer-Reply-Guide.txt to the project's knowledge (your lecturer has shared it; the text is also on the next slide).</p>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-400 italic text-center mt-4">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Button names may look slightly different on your screen. Look for the same idea.
+                </p>
+            </section>
+
+            <!-- SLIDE 11: The company guide -->
+            <section id="slide-11" class="hidden slide-enter w-full max-w-5xl space-y-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-book text-2xl text-amber-400"></i>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Your assistant's handbook</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 italic">This is the guide your assistant will use. Read it first.</p>
+
+                <div class="relative glass-input rounded-xl p-4 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)] group">
+                    <button onclick="copyCode('style-guide-text')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy text-amber-400"></i> Copy
+                    </button>
+                    <pre id="style-guide-text" class="font-mono text-[11px] text-amber-100/90 leading-normal whitespace-pre-wrap pr-20 pt-1 h-[280px] overflow-y-auto">CEYLON FRESH FOODS - CUSTOMER REPLY GUIDE (fictional, for training)
+Tone: polite, warm, short. Use the customer's name. No slang.
+Length: maximum 120 words.
+Structure: 1) thank/acknowledge, 2) answer or action, 3) next step with a time, 4) sign-off.
+Sign-off: "Kind regards, Customer Care Team, Ceylon Fresh Foods"
+POLICIES
+- Delivery: orders placed before 12 noon are delivered next working day (Colombo), 2-3 days elsewhere.
+- Late delivery: apologise, offer 10% off the next order.
+- Damaged items: ask for a photo within 48 hours; replace or refund within 3 working days.
+- Refunds: returned to the original payment method in 5-7 working days.
+- Never promise anything not listed above. If unsure, say a team member will confirm within 24 hours.
+CONTACT: care@ceylonfresh.example | 011 000 0000 (8am-5pm, Mon-Sat)</pre>
+                </div>
+
+                <div class="glass-card p-3 rounded-xl text-xs text-slate-300 border border-white/5">
+                    <i class="fa-solid fa-circle-info text-amber-400 mr-2"></i> No file? Click Copy, paste the text into Notepad, save it as Customer-Reply-Guide.txt, and add that file to your project.
+                </div>
+            </section>
+
+            <!-- SLIDE 12: Prompt 1: Draft Instructions -->
+            <section id="slide-12" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Prompt 1 of 8</span>
+                    <h2 class="text-xl font-bold text-white">Draft the instructions</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 italic border-l-2 border-indigo-400 pl-3">Open a new chat inside your Project, then send this.</p>
+
+                <div class="relative glass-input rounded-xl p-5 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)] group">
+                    <button onclick="copyCode('prompt-1')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy text-indigo-400"></i> Copy
+                    </button>
+                    <pre id="prompt-1" class="font-mono text-sm text-indigo-100 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Using the uploaded style guide, write instructions for a Customer Reply Assistant. Include: its role, rules, tone, reply format, and what to do when it is unsure. Maximum 150 words.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-indigo-900/20 border-l-4 border-l-indigo-400">
+                    <p class="text-sm font-semibold text-indigo-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-indigo-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">Can you see the five parts: role, rules, tone, format, when unsure?</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: Step 2: Save the instructions -->
+            <section id="slide-13" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Session 8 • Step 2</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Save the instructions</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-white/20 text-slate-300">
+                        <i class="fa-solid fa-location-dot mr-1 text-purple-400"></i> Claude • Projects
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold border border-purple-500/30 text-lg">1</div>
+                        <p class="text-sm text-slate-200">Copy Claude's answer from Prompt 1.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold border border-purple-500/30 text-lg">2</div>
+                        <p class="text-sm text-slate-200">Go back to your Project page and find the Instructions section.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold border border-purple-500/30 text-lg">3</div>
+                        <p class="text-sm text-slate-200">Paste the text there and save.</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-800 border border-slate-600 text-center shadow-lg">
+                    <p class="text-sm font-semibold text-purple-200">Your assistant is now built. Every new chat in this Project will follow these instructions.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 14: Prompts 2 to 4: Three test messages -->
+            <section id="slide-14" class="hidden slide-enter w-full max-w-5xl space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-pink-500/20 text-pink-300 border border-pink-500/30">Prompts 2, 3 and 4 of 8</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-white">Three test messages</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 font-semibold bg-pink-900/30 inline-block px-4 py-2 rounded-lg border border-pink-500/30"><i class="fa-solid fa-triangle-exclamation text-pink-400 mr-2"></i> Open a NEW chat inside your Project for each message.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Test 1 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-slate-400">
+                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2">Test 1: Normal</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-3">
+                            <button onclick="copyCode('prompt-2')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-2" class="font-mono text-xs text-slate-200 whitespace-pre-wrap pt-1 pr-10 h-full">Hi, I ordered 2 boxes of mango jam on Monday evening and it's now Thursday in Kandy and nothing has arrived. Very disappointed. - Dilani</pre>
+                        </div>
+                        <div class="text-[11px] text-slate-300 bg-slate-900/50 p-2 rounded border border-white/5">
+                            <strong class="text-pink-300 block mb-1">What to notice:</strong> Does it apologise and offer the 10% discount?
+                        </div>
+                    </div>
+
+                    <!-- Test 2 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-yellow-400">
+                        <h3 class="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">Test 2: Policy</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-3">
+                            <button onclick="copyCode('prompt-3')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-3" class="font-mono text-xs text-slate-200 whitespace-pre-wrap pt-1 pr-10 h-full">The jars in my order #4471 were broken when I opened the box. What do I do? - Rohan</pre>
+                        </div>
+                        <div class="text-[11px] text-slate-300 bg-slate-900/50 p-2 rounded border border-white/5">
+                            <strong class="text-pink-300 block mb-1">What to notice:</strong> Does it ask for a photo within 48 hours?
+                        </div>
+                    </div>
+
+                    <!-- Test 3 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-rose-400">
+                        <h3 class="text-xs font-bold text-rose-400 uppercase tracking-widest mb-2">Test 3: Unreasonable</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-3">
+                            <button onclick="copyCode('prompt-4')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-4" class="font-mono text-xs text-slate-200 whitespace-pre-wrap pt-1 pr-10 h-full">Can you give me a 50% discount and free delivery for life? I'm a loyal customer. - Shanika</pre>
+                        </div>
+                        <div class="text-[11px] text-slate-300 bg-slate-900/50 p-2 rounded border border-white/5">
+                            <strong class="text-pink-300 block mb-1">What to notice:</strong> Does it politely refuse and avoid promising anything?
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 15: Prompt 5: Improve the instructions -->
+            <section id="slide-15" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30">Prompt 5 of 8</span>
+                    <h2 class="text-xl font-bold text-white">Improve the instructions</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 italic border-l-2 border-amber-400 pl-3">Use any of your test chats, then send this.</p>
+
+                <div class="relative glass-input rounded-xl p-5 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)] group">
+                    <button onclick="copyCode('prompt-5')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy text-amber-400"></i> Copy
+                    </button>
+                    <pre id="prompt-5" class="font-mono text-sm text-amber-100 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Suggest one change to the assistant instructions so the replies are always under 100 words and always end with the contact number.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-amber-900/20 border-l-4 border-l-amber-400">
+                    <p class="text-sm font-semibold text-amber-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-amber-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">One small, specific change is easier to test than many changes at once.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 16: Step 3: Apply the change and retest -->
+            <section id="slide-16" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Session 8 • Step 3</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Apply the change and retest</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-white/20 text-slate-300 hidden md:inline-block">
+                        <i class="fa-solid fa-location-dot mr-1 text-emerald-400"></i> Claude • Projects
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-2xl space-y-4 border-l-4 border-emerald-500">
+                        <h3 class="font-bold text-white text-sm mb-2">Instructions Update</h3>
+                        <ol class="text-sm text-slate-200 space-y-3 list-decimal pl-5 marker:text-emerald-400 marker:font-bold">
+                            <li>Add Claude's suggested change to your Project instructions and save.</li>
+                            <li>Open a NEW chat inside the Project.</li>
+                            <li>Send Prompt 6 below.</li>
+                        </ol>
+                    </div>
+
+                    <div class="space-y-3">
+                        <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Prompt 6 of 8</span>
+                        
+                        <div class="relative glass-input rounded-xl p-4 border border-white/10 shadow-lg group">
+                            <button onclick="copyCode('prompt-6')" class="absolute top-3 right-3 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-6" class="font-mono text-sm text-slate-200 whitespace-pre-wrap pr-12 pt-1">Hi, my order has not arrived and I want a refund. How long will that take? - Amaya</pre>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg bg-emerald-900/20 border border-emerald-500/20 text-xs text-slate-300">
+                            <strong class="text-emerald-400 block mb-1"><i class="fa-solid fa-magnifying-glass"></i> What to notice:</strong> 
+                            Is the reply under 100 words, and does it end with the contact number?
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 17: Prompts 7 and 8: Partner challenge -->
+            <section id="slide-17" class="hidden slide-enter w-full max-w-5xl space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Prompts 7 and 8 of 8</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-white">Partner challenge</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 font-semibold bg-cyan-900/30 inline-block px-4 py-2 rounded-lg border border-cyan-500/30">Send each message in a NEW chat inside your Project. Then compare replies with your partner.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Message A -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-cyan-400">
+                        <h3 class="text-xs font-bold text-cyan-300 uppercase tracking-widest mb-2">Message A</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-3">
+                            <button onclick="copyCode('prompt-7')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-7" class="font-mono text-xs text-slate-200 whitespace-pre-wrap pt-1 pr-10">Do you deliver outside Colombo and how much does delivery cost? - Tharindu</pre>
+                        </div>
+                        <div class="text-[11px] text-slate-300 bg-slate-900/50 p-2 rounded border border-white/5">
+                            <strong class="text-cyan-300 block mb-1">What to notice:</strong> The guide does not give a price. Does the assistant make one up, or say a team member will confirm?
+                        </div>
+                    </div>
+
+                    <!-- Message B -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-indigo-400">
+                        <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2">Message B</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-3">
+                            <button onclick="copyCode('prompt-8')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-8" class="font-mono text-xs text-slate-200 whitespace-pre-wrap pt-1 pr-10">My jam tastes strange, I think it has gone bad. - Nuwan</pre>
+                        </div>
+                        <div class="text-[11px] text-slate-300 bg-slate-900/50 p-2 rounded border border-white/5">
+                            <strong class="text-indigo-300 block mb-1">What to notice:</strong> The guide does not cover this. How does the assistant handle it?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel p-3 rounded-xl border border-white/10 flex flex-col md:flex-row items-center gap-4 mt-2 justify-between">
+                    <div class="flex items-center gap-2 text-xs font-bold text-white">
+                        <i class="fa-solid fa-star text-yellow-400"></i> Score out of 5:
+                        <span class="px-2 py-1 rounded bg-white/10 font-normal ml-2">Tone</span>
+                        <span class="px-2 py-1 rounded bg-white/10 font-normal">Accuracy to the guide</span>
+                        <span class="px-2 py-1 rounded bg-white/10 font-normal">Followed the rules</span>
+                    </div>
+                    <div class="text-xs text-cyan-300 italic">Discuss with your partner: whose assistant followed the guide better, and why?</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 18: Take-home: your one-page guide -->
+            <section id="slide-18" class="hidden slide-enter w-full max-w-5xl space-y-4">
+                <div class="border-b border-white/10 pb-3 flex items-center gap-3">
+                    <i class="fa-solid fa-folder-open text-3xl text-yellow-400"></i>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Your assistant, documented</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 italic">Write a one-page guide so anyone can use your assistant. Use this template.</p>
+
+                <div class="relative glass-input rounded-xl p-5 border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.15)] group">
+                    <button onclick="copyCode('onepager-template')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy text-yellow-400"></i> Copy
+                    </button>
+                    <pre id="onepager-template" class="font-mono text-sm text-yellow-100/90 leading-loose whitespace-pre-wrap pr-20 pt-1">MY AI ASSISTANT - ONE-PAGE GUIDE
+Name:
+Purpose (one sentence):
+When to use it:
+How to use it (3 steps):
+What it must never do:
+Example message and reply:
+Tested on (date) / Version:</pre>
+                </div>
+
+                <div class="glass-card p-4 rounded-xl text-xs text-slate-300 border border-white/5 mt-4">
+                    <i class="fa-solid fa-circle-info text-yellow-400 mr-2"></i> <strong class="text-white">Note:</strong> Your assistant stays in your Claude account under Projects. We use it again in later sessions.
+                </div>
+            </section>
+
+            <!-- SLIDE 19: Recap and next session -->
+            <section id="slide-19" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 text-center">
+                    <i class="fa-solid fa-flag-checkered text-3xl text-cyan-400 mb-3 block"></i>
+                    <h2 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">Session 8 recap</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-8">
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">What an AI assistant is</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">Instructions and knowledge in a Claude Project</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">Five parts of good instructions</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">Test, improve, test again</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl max-w-2xl mx-auto text-center border border-indigo-500/30 bg-indigo-900/10 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-2 block">Coming Up Next</span>
+                    <h3 class="font-bold text-white text-lg mb-2">Session 9: AI Research Agents</h3>
+                    <p class="text-sm text-slate-300">Think of one real decision you would like to research, for example a tool to buy or a course to choose.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="w-full glass-panel border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 shrink-0">
+        <button id="prev-btn" onclick="prevSlide()" class="px-4 py-2 rounded-xl glass-card hover:bg-white/10 text-slate-200 text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+
+        <div id="slide-dots" class="hidden md:flex items-center gap-1.5 overflow-x-auto max-w-[50vw] px-2 py-1"></div>
+
+        <button id="next-btn" onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+            Next <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <!-- Custom Toast Notification for Copy action -->
+    <div id="copy-toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-emerald-500/90 text-white px-4 py-2 rounded-full text-xs font-bold opacity-0 transition-opacity duration-300 z-50 pointer-events-none shadow-lg shadow-emerald-500/20 flex items-center gap-2 border border-emerald-400/50">
+        <i class="fa-solid fa-circle-check"></i> Copied to clipboard!
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 20;
+        let sidebarOpen = true;
+
+        function updateSlideUI() {
+            // Hide all slides
+            for (let i = 0; i < totalSlides; i++) {
+                const slide = document.getElementById(`slide-${i}`);
+                if (slide) {
+                    slide.classList.add('hidden');
+                    slide.classList.remove('slide-active');
+                }
+                const navItem = document.getElementById(`nav-item-${i}`);
+                if (navItem) {
+                    navItem.classList.remove('nav-item-active');
+                }
+            }
+
+            // Show current slide
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) {
+                activeSlide.classList.remove('hidden');
+                setTimeout(() => {
+                    activeSlide.classList.add('slide-active');
+                }, 10);
+            }
+
+            // Activate nav item
+            const activeNav = document.getElementById(`nav-item-${currentSlide}`);
+            if (activeNav) {
+                activeNav.classList.add('nav-item-active');
+                // Scroll nav into view if needed
+                activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Update top bar numbers
+            document.getElementById('current-slide-num').innerText = currentSlide + 1;
+            document.getElementById('total-slide-num').innerText = totalSlides;
+
+            // Update progress bar
+            const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Update Buttons
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.innerHTML = 'Session 8 Complete <i class="fa-solid fa-check ml-1"></i>';
+                nextBtn.classList.remove('from-cyan-500', 'to-blue-600');
+                nextBtn.classList.add('from-emerald-500', 'to-emerald-600');
+            } else {
+                nextBtn.innerHTML = 'Next <i class="fa-solid fa-arrow-right ml-1"></i>';
+                nextBtn.classList.add('from-cyan-500', 'to-blue-600');
+                nextBtn.classList.remove('from-emerald-500', 'to-emerald-600');
+            }
+
+            renderDots();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        function jumpToSlide(index) {
+            currentSlide = index;
+            updateSlideUI();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarOpen = !sidebarOpen;
+            if (!sidebarOpen) {
+                sidebar.classList.add('-ml-80');
+            } else {
+                sidebar.classList.remove('-ml-80');
+            }
+        }
+
+        function renderDots() {
+            const dotsContainer = document.getElementById('slide-dots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.onclick = () => jumpToSlide(i);
+                dot.className = `h-2 rounded-full transition-all ${
+                    i === currentSlide ? 'bg-cyan-400 w-5' : 'bg-white/20 hover:bg-white/40 w-2 shrink-0'
+                }`;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function copyCode(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            
+            // Temporary textarea to execute copy command safely
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            showToast();
+        }
+
+        let toastTimeout;
+        function showToast() {
+            const toast = document.getElementById('copy-toast');
+            toast.classList.remove('opacity-0');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // Keyboard Navigation setup
+        document.addEventListener('keydown', (e) => {
+            // Ignore if user is typing in an input (not applicable here, but good practice)
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') { // Space explicitly caught with ' '
+                e.preventDefault(); // Prevent default scroll for space
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize on load
+        window.onload = () => {
+            updateSlideUI();
+        };
+    </script>
+</body>
+</html>

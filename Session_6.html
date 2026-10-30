@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAIP03 - Session 6: Planning, Spreadsheets & AI Ethics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #090911;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.22) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.22) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.18) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.18) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.70);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.70);
+            border-color: rgba(129, 140, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(99, 102, 241, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+            backdrop-filter: blur(8px);
+        }
+        .glass-input:focus {
+            border-color: #818cf8;
+            outline: none;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+        .slide-enter {
+            opacity: 0;
+            transform: scale(0.97) translateY(10px);
+            filter: blur(4px);
+        }
+        .slide-active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);
+            border-left: 3px solid #818cf8;
+            color: #ffffff !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, 0.5); }
+    </style>
+</head>
+<body class="text-slate-100 font-sans h-full overflow-hidden flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <header class="w-full glass-panel border-b border-white/10 px-6 py-3 flex justify-between items-center z-50 relative shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="sidebar-toggle" onclick="toggleSidebar()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition-all flex items-center justify-center" title="Toggle Navigation">
+                <i class="fa-solid fa-bars-staggered text-lg"></i>
+            </button>
+            <div class="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-chart-pie text-white text-base"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-xs md:text-sm text-white tracking-wide flex items-center gap-2">
+                    CAIP03: Session 6 • Planning, Spreadsheets & AI Ethics
+                </h1>
+                <p class="text-[11px] text-slate-400">Lecturer: Mr. Tuan Wazeem • Master Class Deck</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 rounded-full text-xs font-semibold glass-panel border border-indigo-500/30 text-indigo-300">
+                Session 6 (2 Hours)
+            </div>
+            <div class="glass-panel border border-white/10 px-3 py-1 rounded-full text-xs font-mono text-indigo-400">
+                <span id="current-slide-num" class="text-white font-bold">1</span> / <span id="total-slide-num">9</span>
+            </div>
+            <button onclick="toggleFullScreen()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition" title="Toggle Fullscreen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full h-[2px] bg-white/5">
+            <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 h-full w-0 transition-all duration-500 ease-out"></div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+        <aside id="sidebar" class="w-80 glass-panel border-r border-white/10 flex flex-col justify-between transition-all duration-300 ease-in-out z-40 shrink-0">
+            <div class="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-130px)]">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 flex justify-between items-center">
+                    <span>Session 6 Curriculum</span>
+                    <span class="text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">9 Slides</span>
+                </div>
+
+                <div class="space-y-1">
+                    <button id="nav-item-0" onclick="jumpToSlide(0)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-calendar-days w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">01. Session 6 Overview & Objectives</span>
+                    </button>
+                    <button id="nav-item-1" onclick="jumpToSlide(1)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-clock w-4 text-center text-indigo-300"></i>
+                        <span class="truncate font-medium">02. Time-Blocking & Prioritization</span>
+                    </button>
+                    <button id="nav-item-2" onclick="jumpToSlide(2)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-table w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">03. Spreadsheet Formulas & Data Parsing</span>
+                    </button>
+                    <button id="nav-item-3" onclick="jumpToSlide(3)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-flask w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">04. Formula Generator Playground</span>
+                    </button>
+                    <button id="nav-item-4" onclick="jumpToSlide(4)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-display w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">05. Presentation Slide Architecture</span>
+                    </button>
+                    <button id="nav-item-5" onclick="jumpToSlide(5)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-gears w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">06. Workflow Automations</span>
+                    </button>
+                    <button id="nav-item-6" onclick="jumpToSlide(6)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-shield-halved w-4 text-center text-rose-400"></i>
+                        <span class="truncate font-medium">07. Responsible AI & Ethics</span>
+                    </button>
+                    <button id="nav-item-7" onclick="jumpToSlide(7)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-rocket w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">08. Capstone Workflow Project</span>
+                    </button>
+                    <button id="nav-item-8" onclick="jumpToSlide(8)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-award w-4 text-center text-amber-300"></i>
+                        <span class="truncate font-medium">09. Certification Summary</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-white/10 glass-card m-3 rounded-xl text-center shrink-0">
+                <p class="text-[11px] text-slate-300 font-semibold">CAIP03 - Session 6</p>
+                <div class="flex justify-center items-center gap-2 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                    <span class="text-[10px] text-indigo-400 font-medium">Planning, Decks & Ethics</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 relative p-4 md:p-8 flex items-center justify-center overflow-y-auto">
+
+            <!-- SLIDE 1: Session 6 Overview -->
+            <section id="slide-0" class="slide-active w-full max-w-5xl space-y-6">
+                <div class="text-center space-y-3 max-w-3xl mx-auto">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold glass-panel border border-indigo-400/30 text-indigo-300 shadow-lg">
+                        <i class="fa-solid fa-list-check"></i> Session 6 • 2 Hours
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-100 to-slate-300 leading-tight">
+                        AI Planning, Spreadsheet Systems & Ethics
+                    </h2>
+                    <p class="text-slate-300 text-xs md:text-sm leading-relaxed max-w-2xl mx-auto">
+                        Automating personal task management, generating advanced spreadsheet formulas, structuring pitch decks, and adhering to AI governance & privacy.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-indigo-400 relative overflow-hidden group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full glass-panel border border-indigo-500/30 text-indigo-300">Part 1</span>
+                                <h3 class="text-lg font-bold text-white mt-2">Planning & Spreadsheets</h3>
+                            </div>
+                            <i class="fa-solid fa-clock-rotate-left text-indigo-400/30 text-3xl group-hover:text-indigo-400 transition"></i>
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Automated Time-Blocking & Eisenhower Matrix</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> XLOOKUP, INDEX/MATCH & Regex Generation</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Interactive Formula Generator Studio</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-purple-400 relative overflow-hidden group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full glass-panel border border-purple-500/30 text-purple-300">Part 2</span>
+                                <h3 class="text-lg font-bold text-white mt-2">Presentations, Governance & Capstone</h3>
+                            </div>
+                            <i class="fa-solid fa-shield-cat text-purple-400/30 text-3xl group-hover:text-purple-400 transition"></i>
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-400"></i> 8-Slide Executive Deck Architecture</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-400"></i> Responsible AI & PII Safeguards</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-400"></i> Final Capstone Project Execution</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: Time Management & Time-Blocking Systems -->
+            <section id="slide-1" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Session 6 • Topic 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Time Management & Time-Blocking Systems</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-indigo-400"></i> Dynamic Schedule Architecture
+                        </h3>
+                        <p class="text-xs text-slate-300">Converting unstructured task lists into energy-optimized deep work routines:</p>
+                        <div class="p-3 bg-slate-950/70 rounded-xl text-[11px] font-mono text-indigo-200 space-y-1">
+                            <div>08:30 - 10:30 | Deep Work Block (Strategy)</div>
+                            <div>10:30 - 11:30 | Communication & Email Batch</div>
+                            <div>13:00 - 15:00 | Project Execution & Review</div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-pink-400"></i> Eisenhower Matrix Prioritization
+                        </h3>
+                        <p class="text-xs text-slate-300">Prompting AI to categorize workload into 4 distinct quadrants:</p>
+                        <div class="grid grid-cols-2 gap-2 text-[10px] text-center">
+                            <div class="p-2 bg-rose-500/20 rounded border border-rose-500/30 text-rose-200">1. Do First (Urgent/Imp)</div>
+                            <div class="p-2 bg-indigo-500/20 rounded border border-indigo-500/30 text-indigo-200">2. Schedule (Not Urgent/Imp)</div>
+                            <div class="p-2 bg-amber-500/20 rounded border border-amber-500/30 text-amber-200">3. Delegate (Urgent/Not Imp)</div>
+                            <div class="p-2 bg-slate-500/20 rounded border border-slate-500/30 text-slate-300">4. Eliminate (Neither)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: Spreadsheet Formulas & Data Parsing -->
+            <section id="slide-2" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Session 6 • Topic 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Spreadsheet Formulas & Data Parsing</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <span class="text-xs font-bold text-emerald-400 uppercase">Advanced Formula Generation</span>
+                        <p class="text-xs text-slate-300">Generate complex Excel / Google Sheets formulas directly from plain text:</p>
+                        <div class="p-3 bg-slate-950/70 rounded-xl text-xs font-mono text-emerald-300">
+                            =XLOOKUP(A2, EmployeeData!A:A, EmployeeData!C:C, "Not Found", 0)
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <span class="text-xs font-bold text-cyan-400 uppercase">Data Cleaning & Regex</span>
+                        <p class="text-xs text-slate-300">Strip formatting errors and extract email domain strings automatically:</p>
+                        <div class="p-3 bg-slate-950/70 rounded-xl text-xs font-mono text-cyan-300">
+                            =REGEXEXTRACT(B2, "@([a-zA-Z0-9.-]+)")
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: Formula Generator Playground -->
+            <section id="slide-3" class="hidden slide-enter w-full max-w-5xl space-y-5">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Interactive Tool</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Formula Generator Playground</h2>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl space-y-4">
+                    <label class="block text-xs font-bold text-white">Describe what you want to calculate in plain English:</label>
+                    <div class="flex gap-2">
+                        <input id="formula-input" type="text" value="Lookup customer ID in column A and return their revenue from column D" class="flex-1 p-2.5 rounded-xl glass-input text-xs">
+                        <button onclick="generateFormula()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
+                            Generate Formula
+                        </button>
+                    </div>
+
+                    <div id="formula-output" class="p-4 bg-slate-950/90 rounded-xl font-mono text-xs text-emerald-300 border border-emerald-500/30">
+                        =XLOOKUP(A2, CustomerSheet!A:A, CustomerSheet!D:D, 0)
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: Presentation Slide Architecture -->
+            <section id="slide-4" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Session 6 • Topic 2</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Presentation Architecture & Deck Outlines</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5 rounded-2xl space-y-2 border-t-2 border-t-purple-400">
+                        <h3 class="font-bold text-white text-sm">1. Executive Pitch Structure</h3>
+                        <p class="text-xs text-slate-300">Translating complex memos into 8-slide executive pitch decks.</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-2 border-t-2 border-t-cyan-400">
+                        <h3 class="font-bold text-white text-sm">2. Visual Layout Prompts</h3>
+                        <p class="text-xs text-slate-300">Prompting for visual concepts, infographic layouts, and stat calls.</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-2 border-t-2 border-t-pink-400">
+                        <h3 class="font-bold text-white text-sm">3. Speaker Script Generation</h3>
+                        <p class="text-xs text-slate-300">Generating talking point scripts tuned for executive Q&A sessions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: Workflow Task Automations -->
+            <section id="slide-5" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Session 6 • Topic 2</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Task Automations & No-Code Logic</h2>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold text-white text-sm">Mapping Multi-Step Automation Triggers:</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                        <div class="glass-card p-3 rounded-xl border-t-2 border-t-cyan-400">
+                            <strong class="text-cyan-300 block mb-1">Trigger:</strong> Email arrives with attachment
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border-t-2 border-t-indigo-400">
+                            <strong class="text-indigo-300 block mb-1">AI Action:</strong> Extract PDF summary via Gemini
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border-t-2 border-t-emerald-400">
+                            <strong class="text-emerald-300 block mb-1">Data Storage:</strong> Write rows into Google Sheets
+                        </div>
+                        <div class="glass-card p-3 rounded-xl border-t-2 border-t-pink-400">
+                            <strong class="text-pink-300 block mb-1">Notification:</strong> Send alert to Slack channel
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Responsible AI Ethics -->
+            <section id="slide-6" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Session 6 • Topic 3</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Responsible AI, Ethics & Guardrails</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-t-rose-400">
+                        <i class="fa-solid fa-user-shield text-rose-400 text-2xl"></i>
+                        <h3 class="font-bold text-white text-sm">Data Privacy & PII</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Never input confidential client data or passwords into public models. Always scrub personally identifiable info.
+                        </p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-t-amber-400">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400 text-2xl"></i>
+                        <h3 class="font-bold text-white text-sm">Hallucination Detection</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Always cross-verify numerical stats, financial quotes, and legal citations generated by LLMs.
+                        </p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-t-cyan-400">
+                        <i class="fa-solid fa-person-dots-from-line text-cyan-400 text-2xl"></i>
+                        <h3 class="font-bold text-white text-sm">Human-in-the-Loop</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Maintain mandatory human review and accountability for all AI-assisted workplace assets.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: Capstone Workflow Project -->
+            <section id="slide-7" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Session 6 • Capstone Project</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Capstone AI Workflow Project</h2>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <p class="text-xs text-slate-300">Execute a 4-part end-to-end workspace workflow using AI tools:</p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div class="glass-card p-3.5 rounded-xl border-l-2 border-l-cyan-400">
+                            <strong class="text-cyan-300 block mb-1">1. Work Plan</strong>
+                            7-day time-blocked routine.
+                        </div>
+                        <div class="glass-card p-3.5 rounded-xl border-l-2 border-l-indigo-400">
+                            <strong class="text-indigo-300 block mb-1">2. Slide Outline</strong>
+                            8-slide executive presentation outline.
+                        </div>
+                        <div class="glass-card p-3.5 rounded-xl border-l-2 border-l-emerald-400">
+                            <strong class="text-emerald-300 block mb-1">3. Matrix Formulas</strong>
+                            Eisenhower prioritisation spreadsheet formulas.
+                        </div>
+                        <div class="glass-card p-3.5 rounded-xl border-l-2 border-l-pink-400">
+                            <strong class="text-pink-300 block mb-1">4. Workflow Map</strong>
+                            Document prompt-to-verification workflow path.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: Course Completion -->
+            <section id="slide-8" class="hidden slide-enter w-full max-w-2xl text-center space-y-6">
+                <div class="inline-flex p-4 rounded-full glass-panel text-amber-300 text-4xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-white">Module CAIP03 Complete!</h2>
+                <p class="text-slate-300 text-xs md:text-sm leading-relaxed">
+                    Congratulations! You have completed both sessions covering executive prompting, schedule planning, spreadsheet formula generation, presentation structure, and AI ethics.
+                </p>
+                <button onclick="jumpToSlide(0)" class="px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition shadow-lg shadow-indigo-500/25">
+                    <i class="fa-solid fa-rotate-left mr-2"></i> Restart Session 6 Deck
+                </button>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="w-full glass-panel border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 shrink-0">
+        <button id="prev-btn" onclick="prevSlide()" class="px-4 py-2 rounded-xl glass-card hover:bg-white/10 text-slate-200 text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+
+        <div id="slide-dots" class="hidden md:flex items-center gap-1.5"></div>
+
+        <button id="next-btn" onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-indigo-500/20">
+            Next <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 9;
+        let sidebarOpen = true;
+
+        function updateSlideUI() {
+            for (let i = 0; i < totalSlides; i++) {
+                const slide = document.getElementById(`slide-${i}`);
+                if (slide) {
+                    slide.classList.add('hidden');
+                    slide.classList.remove('slide-active');
+                }
+                const navItem = document.getElementById(`nav-item-${i}`);
+                if (navItem) {
+                    navItem.classList.remove('nav-item-active');
+                }
+            }
+
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) {
+                activeSlide.classList.remove('hidden');
+                setTimeout(() => {
+                    activeSlide.classList.add('slide-active');
+                }, 10);
+            }
+
+            const activeNav = document.getElementById(`nav-item-${currentSlide}`);
+            if (activeNav) {
+                activeNav.classList.add('nav-item-active');
+            }
+
+            document.getElementById('current-slide-num').innerText = currentSlide + 1;
+            document.getElementById('total-slide-num').innerText = totalSlides;
+
+            const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.innerHTML = 'Finish Certification <i class="fa-solid fa-check ml-1"></i>';
+            } else {
+                nextBtn.innerHTML = 'Next <i class="fa-solid fa-arrow-right ml-1"></i>';
+            }
+
+            renderDots();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        function jumpToSlide(index) {
+            currentSlide = index;
+            updateSlideUI();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarOpen = !sidebarOpen;
+            if (!sidebarOpen) {
+                sidebar.classList.add('-ml-80');
+            } else {
+                sidebar.classList.remove('-ml-80');
+            }
+        }
+
+        function renderDots() {
+            const dotsContainer = document.getElementById('slide-dots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.onclick = () => jumpToSlide(i);
+                dot.className = `h-2 rounded-full transition-all ${
+                    i === currentSlide ? 'bg-indigo-400 w-5' : 'bg-white/20 hover:bg-white/40 w-2'
+                }`;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function generateFormula() {
+            const query = document.getElementById('formula-input').value;
+            const output = document.getElementById('formula-output');
+            if (query.toLowerCase().includes('lookup')) {
+                output.innerText = '=XLOOKUP(A2, CustomerSheet!A:A, CustomerSheet!D:D, "Not Found", 0)';
+            } else if (query.toLowerCase().includes('email') || query.toLowerCase().includes('domain')) {
+                output.innerText = '=REGEXEXTRACT(B2, "@([a-zA-Z0-9.-]+)")';
+            } else {
+                output.innerText = '=QUERY(A1:E100, "SELECT A, SUM(D) WHERE E = \'Completed\' GROUP BY A", 1)';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        window.onload = () => {
+            updateSlideUI();
+        };
+    </script>
+</body>
+</html>

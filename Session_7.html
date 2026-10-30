@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAI04 - Session 7: From Chatbot to AI Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#38bdf8',
+                            500: '#06b6d4',
+                            600: '#0284c7',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #080c14;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.20) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.22) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.18) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.18) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.70);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.70);
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(56, 189, 248, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+            backdrop-filter: blur(8px);
+        }
+        .glass-input:focus {
+            border-color: #38bdf8;
+            outline: none;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .slide-enter {
+            opacity: 0;
+            transform: scale(0.97) translateY(10px);
+            filter: blur(4px);
+        }
+        .slide-active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            border-left: 3px solid #38bdf8;
+            color: #ffffff !important;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.5); }
+    </style>
+</head>
+<body class="text-slate-100 font-sans h-full overflow-hidden flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <header class="w-full glass-panel border-b border-white/10 px-6 py-3 flex justify-between items-center z-50 relative shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="sidebar-toggle" onclick="toggleSidebar()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition-all flex items-center justify-center" title="Toggle Navigation">
+                <i class="fa-solid fa-bars-staggered text-lg"></i>
+            </button>
+            <div class="bg-gradient-to-tr from-cyan-500 via-blue-500 to-indigo-500 p-2 rounded-xl shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-base"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-xs md:text-sm text-white tracking-wide flex items-center gap-2">
+                    CAI04: Session 7 • From Chatbot to AI Agent
+                </h1>
+                <p class="text-[11px] text-slate-400">Lecturer: Mr. Sanchuka Kavinda • Master Class Deck</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 rounded-full text-xs font-semibold glass-panel border border-cyan-500/30 text-cyan-300">
+                Session 7 (2 Hours)
+            </div>
+            <div class="glass-panel border border-white/10 px-3 py-1 rounded-full text-xs font-mono text-cyan-400">
+                <span id="current-slide-num" class="text-white font-bold">1</span> / <span id="total-slide-num">19</span>
+            </div>
+            <button onclick="toggleFullScreen()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition" title="Toggle Fullscreen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full h-[2px] bg-white/5">
+            <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-500 h-full w-0 transition-all duration-500 ease-out"></div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+        <aside id="sidebar" class="w-80 glass-panel border-r border-white/10 flex flex-col justify-between transition-all duration-300 ease-in-out z-40 shrink-0">
+            <div class="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-130px)]">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 flex justify-between items-center">
+                    <span>Session 7 Curriculum</span>
+                    <span class="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">19 Slides</span>
+                </div>
+
+                <div class="space-y-1">
+                    <button id="nav-item-0" onclick="jumpToSlide(0)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-compass w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">01. Session 7 Overview</span>
+                    </button>
+                    <button id="nav-item-1" onclick="jumpToSlide(1)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-list-check w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">02. Plan and Take-home</span>
+                    </button>
+                    <button id="nav-item-2" onclick="jumpToSlide(2)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-check w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">03. Setup Check</span>
+                    </button>
+                    <button id="nav-item-3" onclick="jumpToSlide(3)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-route w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">04. Where We Are</span>
+                    </button>
+                    <button id="nav-item-4" onclick="jumpToSlide(4)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-robot w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">05. Chatbot vs Assistant vs Agent</span>
+                    </button>
+                    <button id="nav-item-5" onclick="jumpToSlide(5)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-puzzle-piece w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">06. Four Parts of an Agent</span>
+                    </button>
+                    <button id="nav-item-6" onclick="jumpToSlide(6)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-terminal w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">07. The Agent Prompt Formula</span>
+                    </button>
+                    <button id="nav-item-7" onclick="jumpToSlide(7)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-triangle-exclamation w-4 text-center text-rose-400"></i>
+                        <span class="truncate font-medium">08. Where Agents Fail</span>
+                    </button>
+                    <button id="nav-item-8" onclick="jumpToSlide(8)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-display w-4 text-center text-yellow-400"></i>
+                        <span class="truncate font-medium">09. Lecturer Demo</span>
+                    </button>
+                    <button id="nav-item-9" onclick="jumpToSlide(9)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-briefcase w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">10. Lab: The Scenario</span>
+                    </button>
+                    <button id="nav-item-10" onclick="jumpToSlide(10)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-1 w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">11. Prompt 1: One-liner</span>
+                    </button>
+                    <button id="nav-item-11" onclick="jumpToSlide(11)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-2 w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">12. Prompt 2: Agent Prompt</span>
+                    </button>
+                    <button id="nav-item-12" onclick="jumpToSlide(12)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-3 w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">13. Prompt 3: Check the Work</span>
+                    </button>
+                    <button id="nav-item-13" onclick="jumpToSlide(13)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-4 w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">14. Prompt 4: New Task</span>
+                    </button>
+                    <button id="nav-item-14" onclick="jumpToSlide(14)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-5 w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">15. Prompt 5: Improve It</span>
+                    </button>
+                    <button id="nav-item-15" onclick="jumpToSlide(15)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-6 w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">16. Prompt 6: Save as Template</span>
+                    </button>
+                    <button id="nav-item-16" onclick="jumpToSlide(16)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">17. Check and Improve</span>
+                    </button>
+                    <button id="nav-item-17" onclick="jumpToSlide(17)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-folder-open w-4 text-center text-yellow-400"></i>
+                        <span class="truncate font-medium">18. Take-home Playbook</span>
+                    </button>
+                    <button id="nav-item-18" onclick="jumpToSlide(18)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-flag-checkered w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">19. Recap and Next</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-white/10 glass-card m-3 rounded-xl text-center shrink-0">
+                <p class="text-[11px] text-slate-300 font-semibold">CAI04 - Session 7</p>
+                <div class="flex justify-center items-center gap-2 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="text-[10px] text-cyan-400 font-medium">From Chatbot to AI Agent</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 relative p-4 md:p-8 flex items-center justify-center overflow-y-auto pb-16">
+
+            <!-- SLIDE 0: Overview and agenda -->
+            <section id="slide-0" class="slide-active w-full max-w-5xl space-y-6">
+                <div class="text-center space-y-3 max-w-3xl mx-auto">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold glass-panel border border-cyan-400/30 text-cyan-300 shadow-lg">
+                        <i class="fa-solid fa-compass"></i> Session 7 • 2 Hours
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-slate-300 leading-tight">
+                        From Chatbot to AI Agent
+                    </h2>
+                    <p class="text-slate-300 text-xs md:text-sm leading-relaxed max-w-2xl mx-auto">
+                        Learn to give AI a goal, a plan and a checking step, and stay in control of the result.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-cyan-400 relative overflow-hidden group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full glass-panel border border-cyan-500/30 text-cyan-300">Part 1</span>
+                                <h3 class="text-lg font-bold text-white mt-2">Understand Agents</h3>
+                            </div>
+                            <i class="fa-solid fa-robot text-cyan-400/30 text-3xl group-hover:text-cyan-400 transition"></i>
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> What is an AI agent?</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Chatbots vs assistants vs agents</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-cyan-400"></i> Where agents fail</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-indigo-400 relative overflow-hidden group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full glass-panel border border-indigo-500/30 text-indigo-300">Part 2</span>
+                                <h3 class="text-lg font-bold text-white mt-2">Build with Claude</h3>
+                            </div>
+                            <i class="fa-solid fa-terminal text-indigo-400/30 text-3xl group-hover:text-indigo-400 transition"></i>
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Compare a one-line prompt with an agent prompt</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Check and fix the output</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Save your Agent Prompt Playbook</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 1: Plan for today -->
+            <section id="slide-1" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Session 7 • Topic 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Today's plan</h2>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-slate-400">
+                        <div class="w-20 text-xs font-mono text-slate-400 shrink-0">0-10 min</div>
+                        <div class="text-sm font-semibold text-white">Setup check</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-cyan-400">
+                        <div class="w-20 text-xs font-mono text-cyan-400 shrink-0">10-35 min</div>
+                        <div class="text-sm font-semibold text-white">Concepts (4 short topics)</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-indigo-400">
+                        <div class="w-20 text-xs font-mono text-indigo-400 shrink-0">35-95 min</div>
+                        <div class="text-sm font-semibold text-white">Hands-on lab (6 prompts)</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-emerald-400">
+                        <div class="w-20 text-xs font-mono text-emerald-400 shrink-0">95-120 min</div>
+                        <div class="text-sm font-semibold text-white">Check, build your playbook, recap</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl mt-6 flex items-start gap-4 border border-yellow-500/30 bg-yellow-500/5">
+                    <div class="p-2 bg-yellow-500/20 text-yellow-400 rounded-lg"><i class="fa-solid fa-gift"></i></div>
+                    <div>
+                        <h4 class="text-sm font-bold text-yellow-400 mb-1">Take-home product</h4>
+                        <p class="text-xs text-slate-300">Agent Prompt Playbook: three tested prompts you can use at work tomorrow.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: Setup check -->
+            <section id="slide-2" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Session 7 • Setup</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Setup check</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-white/20 text-slate-300">
+                        <i class="fa-solid fa-location-dot mr-1 text-emerald-400"></i> claude.ai
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0 border border-emerald-500/30">1</div>
+                        <p class="text-sm text-slate-200 mt-1">Open <strong>claude.ai</strong> and sign in with your free account.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0 border border-emerald-500/30">2</div>
+                        <p class="text-sm text-slate-200 mt-1">Click <strong>"New chat"</strong>.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0 border border-emerald-500/30">3</div>
+                        <p class="text-sm text-slate-200 mt-1">Check that you can see the message box. You do not need to send anything yet.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0 border border-emerald-500/30">4</div>
+                        <p class="text-sm text-slate-200 mt-1">Keep this guide open next to Claude.</p>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-400 italic text-center mt-6">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Cannot log in? Tell the lecturer now so we can pair you with a classmate.
+                </p>
+            </section>
+
+            <!-- SLIDE 3: Where we are -->
+            <section id="slide-3" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Session 7 • Concept</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">From asking to delegating</h2>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-2 py-8 relative">
+                    <div class="glass-card p-6 rounded-2xl w-full md:w-1/3 flex flex-col items-center text-center space-y-3 z-10">
+                        <div class="w-12 h-12 rounded-full bg-slate-700/50 flex items-center justify-center text-xl text-slate-400 mb-2 border border-slate-600/50">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg">Ask</h3>
+                        <p class="text-xs text-slate-300">Ask AI a question.</p>
+                        <span class="text-[10px] text-slate-500 font-mono mt-auto pt-2">Sessions 1-2</span>
+                    </div>
+
+                    <div class="hidden md:flex items-center justify-center w-8 z-0">
+                        <i class="fa-solid fa-arrow-right text-slate-600"></i>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl w-full md:w-1/3 flex flex-col items-center text-center space-y-3 z-10">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-xl text-cyan-400 mb-2 border border-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                            <i class="fa-solid fa-terminal"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg">Instruct</h3>
+                        <p class="text-xs text-slate-300">Give clear instructions using C-R-E-A-T-E.</p>
+                        <span class="text-[10px] text-cyan-500 font-mono mt-auto pt-2">Sessions 3-6</span>
+                    </div>
+
+                    <div class="hidden md:flex items-center justify-center w-8 z-0">
+                        <i class="fa-solid fa-arrow-right text-purple-500"></i>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl w-full md:w-1/3 flex flex-col items-center text-center space-y-3 border border-purple-500/40 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.15)] z-10">
+                        <div class="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-xl text-white mb-2 shadow-lg shadow-purple-500/40">
+                            <i class="fa-solid fa-sitemap"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg">Delegate</h3>
+                        <p class="text-xs text-purple-200">Give AI a multi-step job and check the result.</p>
+                        <span class="text-[10px] text-purple-400 font-mono font-bold mt-auto pt-2">Today</span>
+                    </div>
+                </div>
+
+                <div class="text-center p-3 rounded-lg bg-white/5 text-sm text-slate-300 border border-white/10">
+                    Today we build on C-R-E-A-T-E. You already know most of what an agent needs.
+                </div>
+            </section>
+
+            <!-- SLIDE 4: Chatbot vs Assistant vs Agent -->
+            <section id="slide-4" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Concept 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Chatbot vs assistant vs agent</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Chatbot -->
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Chatbot</h3>
+                            <i class="fa-solid fa-message text-slate-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-300 italic flex-1">"A search box that answers one question at a time."</p>
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-1 rounded bg-slate-800 text-[10px] font-mono text-slate-300 border border-slate-700">single-turn response</span>
+                            <div class="p-2.5 rounded bg-slate-900/80 text-[11px] text-slate-400 border border-white/5">
+                                <strong class="text-white">Example:</strong> "What is a pivot table?"
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assistant -->
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-t-2 border-t-cyan-400">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Assistant</h3>
+                            <i class="fa-solid fa-headset text-cyan-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-300 italic flex-1">"A helpful colleague who follows your standing instructions."</p>
+                        <div class="space-y-2">
+                            <span class="inline-block px-2 py-1 rounded bg-cyan-900/30 text-[10px] font-mono text-cyan-300 border border-cyan-500/30">system prompt (custom instructions)</span>
+                            <div class="p-2.5 rounded bg-slate-900/80 text-[11px] text-slate-400 border border-white/5">
+                                <strong class="text-white">Example:</strong> "Always reply to customers in our company tone."
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agent -->
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-t-2 border-t-pink-400 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-pink-500/10 rounded-full blur-xl"></div>
+                        <div class="flex justify-between items-start relative z-10">
+                            <h3 class="font-bold text-lg text-white">Agent</h3>
+                            <i class="fa-solid fa-robot text-pink-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-300 italic flex-1 relative z-10">"A capable intern you give a goal to. They plan the steps, use tools, check their work and report back."</p>
+                        <div class="space-y-2 relative z-10">
+                            <span class="inline-block px-2 py-1 rounded bg-pink-900/30 text-[10px] font-mono text-pink-300 border border-pink-500/30">agentic workflow</span>
+                            <div class="p-2.5 rounded bg-slate-900/80 text-[11px] text-slate-400 border border-white/5">
+                                <strong class="text-white">Example:</strong> "Research three suppliers, compare them and draft a recommendation."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center p-3 rounded-lg bg-pink-500/10 text-xs text-pink-100 border border-pink-500/20">
+                    In this course you design the goal, steps and checks, and Claude carries them out while you stay in control.
+                </div>
+            </section>
+
+            <!-- SLIDE 5: Four parts of an agent -->
+            <section id="slide-5" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Concept 2</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">The four parts of an agent</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 mb-3"><i class="fa-solid fa-bullseye text-lg"></i></div>
+                        <h3 class="font-bold text-white">Goal</h3>
+                        <p class="text-xs text-slate-300">"What a finished job looks like."</p>
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <span class="text-[10px] font-mono text-amber-300">Term: objective</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3"><i class="fa-solid fa-list-ol text-lg"></i></div>
+                        <h3 class="font-bold text-white">Steps</h3>
+                        <p class="text-xs text-slate-300">"The plan: do this, then this, then this."</p>
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <span class="text-[10px] font-mono text-emerald-300">Term: planning</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3"><i class="fa-solid fa-toolbox text-lg"></i></div>
+                        <h3 class="font-bold text-white">Tools</h3>
+                        <p class="text-xs text-slate-300">"What the intern can use: web search, files, apps."</p>
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <span class="text-[10px] font-mono text-indigo-300">Term: tool use</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400 mb-3"><i class="fa-solid fa-clipboard-check text-lg"></i></div>
+                        <h3 class="font-bold text-white">Checks</h3>
+                        <p class="text-xs text-slate-300">"Check the work before reporting back."</p>
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <span class="text-[10px] font-mono text-rose-300">Term: feedback loop</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center p-3 text-xs text-slate-400 italic">
+                    Sessions 8-11 add assistants, web search, files and automation to these four parts.
+                </div>
+            </section>
+
+            <!-- SLIDE 6: Agent prompt formula -->
+            <section id="slide-6" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Concept 3</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Agent prompt = C-R-E-A-T-E, rearranged</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/10">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-900/80 border-b border-white/10">
+                                <tr>
+                                    <th class="px-5 py-3 font-semibold text-slate-300">C-R-E-A-T-E Framework</th>
+                                    <th class="px-5 py-3 font-semibold text-cyan-300">Agent Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5 text-xs">
+                                <tr class="hover:bg-white/5 transition">
+                                    <td class="px-5 py-3 text-slate-400">Context + Role</td>
+                                    <td class="px-5 py-3 text-white font-medium"><i class="fa-solid fa-arrow-right-long text-cyan-500 mr-2 text-[10px]"></i> Input (the facts and who you are)</td>
+                                </tr>
+                                <tr class="hover:bg-white/5 transition bg-cyan-900/10">
+                                    <td class="px-5 py-3 text-slate-400">Explicit Task</td>
+                                    <td class="px-5 py-3 text-white font-medium"><i class="fa-solid fa-arrow-right-long text-cyan-500 mr-2 text-[10px]"></i> Goal + Steps</td>
+                                </tr>
+                                <tr class="hover:bg-white/5 transition bg-cyan-900/10">
+                                    <td class="px-5 py-3 text-slate-400">Anti-Goals</td>
+                                    <td class="px-5 py-3 text-white font-medium"><i class="fa-solid fa-arrow-right-long text-cyan-500 mr-2 text-[10px]"></i> Checks ("do not guess")</td>
+                                </tr>
+                                <tr class="hover:bg-white/5 transition">
+                                    <td class="px-5 py-3 text-slate-400">Tone & Format</td>
+                                    <td class="px-5 py-3 text-white font-medium"><i class="fa-solid fa-arrow-right-long text-cyan-500 mr-2 text-[10px]"></i> Format</td>
+                                </tr>
+                                <tr class="hover:bg-white/5 transition">
+                                    <td class="px-5 py-3 text-slate-400">Examples</td>
+                                    <td class="px-5 py-3 text-slate-500 italic"><i class="fa-solid fa-arrow-right-long text-slate-600 mr-2 text-[10px]"></i> Optional</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="relative glass-input rounded-xl p-5 border-l-4 border-l-cyan-400 shadow-lg">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xs font-bold text-cyan-300 uppercase tracking-widest"><i class="fa-solid fa-code mr-1"></i> The Formula Template</h3>
+                            <button onclick="copyCode('formula-box')" class="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre id="formula-box" class="font-mono text-sm text-slate-200 leading-loose whitespace-pre-wrap">Goal: ...
+Steps: (1) ... (2) ... (3) ...
+Checks: ...
+Format: ...
+Input: ...</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Where agents fail -->
+            <section id="slide-7" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Concept 4</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Where agents fail</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 italic mb-4">"Like a confident new intern who never says 'I don't know'."</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="glass-card p-4 rounded-xl border-l-2 border-l-rose-500 flex flex-col justify-center">
+                        <strong class="text-rose-400 text-sm mb-1"><i class="fa-solid fa-ghost mr-2 text-xs"></i>Hallucination</strong>
+                        <p class="text-xs text-slate-300">States made-up facts with confidence.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl border-l-2 border-l-orange-500 flex flex-col justify-center">
+                        <strong class="text-orange-400 text-sm mb-1"><i class="fa-solid fa-eye-slash mr-2 text-xs"></i>Silent assumptions</strong>
+                        <p class="text-xs text-slate-300">Fills gaps without telling you.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl border-l-2 border-l-yellow-500 flex flex-col justify-center">
+                        <strong class="text-yellow-400 text-sm mb-1"><i class="fa-solid fa-forward-step mr-2 text-xs"></i>Skipped steps</strong>
+                        <p class="text-xs text-slate-300">Drops a step in a long task.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl border-l-2 border-l-purple-500 flex flex-col justify-center">
+                        <strong class="text-purple-400 text-sm mb-1"><i class="fa-solid fa-handshake-slash mr-2 text-xs"></i>Over-trust</strong>
+                        <p class="text-xs text-slate-300">We stop checking because it sounds right.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 text-[10px] font-mono text-slate-400 mb-6">
+                    <span class="px-2 py-1 rounded bg-white/5 border border-white/10">hallucination</span>
+                    <span class="px-2 py-1 rounded bg-white/5 border border-white/10">grounding (tying answers to the facts you gave)</span>
+                    <span class="px-2 py-1 rounded bg-white/5 border border-white/10">human-in-the-loop</span>
+                </div>
+
+                <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-center text-rose-100 font-semibold shadow-[0_0_15px_rgba(244,63,94,0.15)]">
+                    <i class="fa-solid fa-triangle-exclamation mr-2 text-rose-400"></i> You are the manager. AI drafts, you decide.
+                </div>
+            </section>
+
+            <!-- SLIDE 8: Live demo -->
+            <section id="slide-8" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Lecturer Demo</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Watch: same task, two prompts</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-1 mr-1"></i> Prompt A: one line</span>
+                        <div class="p-4 bg-slate-900/80 rounded-xl font-mono text-sm text-slate-300 leading-relaxed min-h-[80px] flex items-center">
+                            "Write my weekly update email."
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-t-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.1)]">
+                        <span class="text-xs font-bold text-yellow-400 uppercase"><i class="fa-solid fa-bolt mr-1"></i> Prompt B: agent prompt</span>
+                        <div class="p-4 bg-slate-900/80 rounded-xl font-mono text-sm text-yellow-100 leading-relaxed min-h-[80px] flex items-center border border-yellow-500/20">
+                            "Goal, steps, checks and format."
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl text-center space-y-2 mt-4">
+                    <p class="text-sm font-semibold text-white"><i class="fa-regular fa-eye mr-2 text-cyan-400"></i> What to notice: structure, length, and anything the AI invented.</p>
+                    <p class="text-xs text-rose-400 font-medium">Watch only. Do not type yet.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: Lab scenario -->
+            <section id="slide-9" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Hands-on Lab</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Your scenario</h2>
+                </div>
+
+                <div class="glass-card p-4 rounded-xl text-sm text-slate-200 border-l-4 border-emerald-400 leading-relaxed bg-emerald-900/20">
+                    <i class="fa-solid fa-user-tie mr-2 text-emerald-400"></i> You are the Operations Coordinator at Ceylon Fresh Foods (a fictional company). Every Friday you send your manager, Ms Perera, a weekly update.
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 rounded-2xl space-y-3">
+                        <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-file-lines text-slate-400"></i> Facts for this week</h3>
+                        <ul class="text-xs text-slate-300 space-y-2 list-disc pl-5 marker:text-emerald-500">
+                            <li>Orders received: 142 (last week: 128)</li>
+                            <li>Late deliveries: 9 (last week: 14)</li>
+                            <li>Customer complaints: 5 (3 about damaged packaging, 2 about late delivery)</li>
+                            <li>New hire: Nimal started Monday in the packing team</li>
+                            <li>Delivery van 2 is in the garage until Wednesday next week</li>
+                            <li>Next week's priority: prepare for the Avurudu festive season orders</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-list-check text-cyan-400"></i> Rules for the lab</h3>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-cyan-500 mt-0.5"></i> Start a new chat in Claude.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-cyan-500 mt-0.5"></i> Send one prompt at a time and read the reply before the next.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-cyan-500 mt-0.5"></i> Use the Copy button. Do not retype.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-cyan-500 mt-0.5"></i> Stay in the same chat for prompts 1 to 6.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-clock text-cyan-500 mt-0.5"></i> Plan for 6 prompts (up to 7 if you have time).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: Prompt 1 -->
+            <section id="slide-10" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Prompt 1 of 6</span>
+                    <h2 class="text-xl font-bold text-white">The One-liner</h2>
+                </div>
+
+                <div class="relative glass-input rounded-xl p-5 border border-white/10 shadow-lg group">
+                    <button onclick="copyCode('prompt-1')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                    <pre id="prompt-1" class="font-mono text-sm text-slate-200 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Facts for this week: Orders received 142 (last week 128). Late deliveries 9 (last week 14). Customer complaints 5 (3 about damaged packaging, 2 about late delivery). New hire Nimal started Monday in the packing team. Delivery van 2 is in the garage until Wednesday next week. Next week's priority: prepare for the Avurudu festive season orders.
+
+Write my weekly update email to my manager.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-cyan-900/20 border-l-4 border-l-cyan-400">
+                    <p class="text-sm font-semibold text-cyan-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-cyan-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">Is it clear and short? Did it add anything that was not in the facts?</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 11: Prompt 2 -->
+            <section id="slide-11" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Prompt 2 of 6</span>
+                    <h2 class="text-xl font-bold text-white">The Agent Prompt</h2>
+                </div>
+
+                <div class="relative glass-input rounded-xl p-5 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)] group">
+                    <button onclick="copyCode('prompt-2')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy text-indigo-400"></i> Copy
+                    </button>
+                    <pre id="prompt-2" class="font-mono text-sm text-indigo-100 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Goal: write the weekly update email to my manager, Ms Perera. Steps: (1) group the facts into Results, Problems and Next week; (2) write the email; (3) check every number against the facts. Format: under 150 words, 3 short sections. Finish by listing anything you assumed. Use the same facts as before.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-indigo-900/20 border-l-4 border-l-indigo-400">
+                    <p class="text-sm font-semibold text-indigo-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-indigo-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">Compare with Prompt 1. What changed in the structure and the details?</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 12: Prompt 3 -->
+            <section id="slide-12" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-300 border border-purple-500/30">Prompt 3 of 6</span>
+                    <h2 class="text-xl font-bold text-white">Check the Work</h2>
+                </div>
+
+                <div class="relative glass-input rounded-xl p-5 border border-white/10 shadow-lg group">
+                    <button onclick="copyCode('prompt-3')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                    <pre id="prompt-3" class="font-mono text-sm text-slate-200 leading-relaxed whitespace-pre-wrap pr-20 pt-1">List every statement in the email that was not in my facts.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-purple-900/20 border-l-4 border-l-purple-400">
+                    <p class="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-purple-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">Did Claude find anything it invented? This is the checking step.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: Prompt 4 -->
+            <section id="slide-13" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-pink-500/20 text-pink-300 border border-pink-500/30">Prompt 4 of 6</span>
+                    <h2 class="text-xl font-bold text-white">New Task</h2>
+                </div>
+
+                <p class="text-sm text-slate-300 italic">Now use the same structure on a different task.</p>
+
+                <div class="relative glass-input rounded-xl p-5 border border-white/10 shadow-lg group">
+                    <button onclick="copyCode('prompt-4')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                    <pre id="prompt-4" class="font-mono text-sm text-slate-200 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Goal: write a short reply to a customer whose jam order is 3 days late. Steps: (1) apologise; (2) offer 10% off the next order; (3) give a next step. Check: promise nothing else. Format: under 80 words. Customer name: Dilani.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-pink-900/20 border-l-4 border-l-pink-400">
+                    <p class="text-sm font-semibold text-pink-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-pink-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">Did the same structure work on a new task?</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 14: Prompt 5 -->
+            <section id="slide-14" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30">Prompt 5 of 6</span>
+                    <h2 class="text-xl font-bold text-white">Improve It</h2>
+                </div>
+
+                <div class="relative glass-input rounded-xl p-5 border border-white/10 shadow-lg group">
+                    <button onclick="copyCode('prompt-5')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                    <pre id="prompt-5" class="font-mono text-sm text-slate-200 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Make it warmer and add that we will confirm delivery within 24 hours.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-amber-900/20 border-l-4 border-l-amber-400">
+                    <p class="text-sm font-semibold text-amber-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-amber-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">A short follow-up can improve a good first draft.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 15: Prompt 6 -->
+            <section id="slide-15" class="hidden slide-enter w-full max-w-4xl space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Prompt 6 of 6</span>
+                    <h2 class="text-xl font-bold text-white">Save as Template</h2>
+                </div>
+
+                <div class="relative glass-input rounded-xl p-5 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] group">
+                    <button onclick="copyCode('prompt-6')" class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition flex items-center gap-1.5 border border-white/10 z-10">
+                        <i class="fa-solid fa-copy text-emerald-400"></i> Copy
+                    </button>
+                    <pre id="prompt-6" class="font-mono text-sm text-emerald-100 leading-relaxed whitespace-pre-wrap pr-20 pt-1">Turn my last prompt into a reusable template with blanks I can fill in next time, and add one line explaining how to use it.</pre>
+                </div>
+
+                <div class="p-4 rounded-xl bg-emerald-900/20 border-l-4 border-l-emerald-400">
+                    <p class="text-sm font-semibold text-emerald-100 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-emerald-400"></i> What to notice:
+                    </p>
+                    <p class="text-xs text-slate-300 mt-1 pl-6">Claude writes the template with blanks such as a name or a number of days.</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-xl text-xs text-slate-300 mt-4 border border-white/5">
+                    <i class="fa-solid fa-star text-yellow-400 mr-2"></i> <strong class="text-white">Optional if you have time:</strong> Fill the blanks with real details (for example a customer name and the number of days late) and send it as one more prompt. The same template now works for any late-order reply.
+                </div>
+            </section>
+
+            <!-- SLIDE 16: Check and improve -->
+            <section id="slide-16" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Review</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Check and improve</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="glass-card p-6 rounded-2xl space-y-4">
+                        <h3 class="font-bold text-white text-sm mb-4 border-b border-white/10 pb-2">Evaluation Checklist</h3>
+                        <ul class="text-sm text-slate-300 space-y-3">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Do the numbers match my facts?</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Did it follow the format and word limit?</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Did it list its assumptions?</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Is anything in it invented?</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-emerald-400"></i> Is the tone right for a manager?</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl text-center flex flex-col justify-center items-center h-full border-t-4 border-t-cyan-400 bg-cyan-900/10">
+                        <div class="w-16 h-16 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-4 border border-cyan-500/30">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h4 class="font-bold text-lg text-white mb-2">Pair Discussion (2 mins)</h4>
+                        <p class="text-sm text-slate-300">"Which prompt gave the better result, and why?"</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 17: Take-home Playbook -->
+            <section id="slide-17" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 flex items-center gap-3">
+                    <i class="fa-solid fa-folder-open text-3xl text-yellow-400"></i>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Your Agent Prompt Playbook</h2>
+                </div>
+
+                <div class="text-sm text-slate-300 p-4 glass-card rounded-xl border border-yellow-500/20 bg-yellow-500/5 mb-6">
+                    <strong class="text-yellow-400">Action:</strong> Save these in a Google Doc or notes app called <em>My Agent Prompt Playbook</em>. Add one line to each: when you will use it.
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="p-3 bg-white/5 rounded-xl text-slate-300 text-xl"><i class="fa-regular fa-file-lines"></i></div>
+                        <h3 class="font-bold text-white text-sm">1. Weekly update agent prompt</h3>
+                        <p class="text-[10px] text-slate-400 font-mono">(your Prompt 2)</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-yellow-400">
+                        <div class="p-3 bg-yellow-500/20 rounded-xl text-yellow-400 text-xl"><i class="fa-solid fa-users-gear"></i></div>
+                        <h3 class="font-bold text-white text-sm">2. Customer reply template</h3>
+                        <p class="text-[10px] text-slate-400 font-mono">(from your Prompt 6)</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="p-3 bg-white/5 rounded-xl text-slate-300 text-xl"><i class="fa-solid fa-check-double"></i></div>
+                        <h3 class="font-bold text-white text-sm">3. Checking prompt</h3>
+                        <p class="text-[10px] text-slate-400 font-mono">(your Prompt 3)</p>
+                    </div>
+                </div>
+
+                <p class="text-xs text-center text-slate-500 italic mt-6"><i class="fa-solid fa-arrow-right-long mr-2"></i>We use your playbook again in Session 8.</p>
+            </section>
+
+            <!-- SLIDE 18: Recap and next session -->
+            <section id="slide-18" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 text-center">
+                    <i class="fa-solid fa-flag-checkered text-3xl text-cyan-400 mb-3 block"></i>
+                    <h2 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">Session 7 recap</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-8">
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">What an AI agent is</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">Chatbot vs assistant vs agent</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">Goal, Steps, Checks and Format</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-sm font-medium text-slate-200">Where agents fail and how to check them</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl max-w-2xl mx-auto text-center border border-indigo-500/30 bg-indigo-900/10 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-2 block">Coming Up Next</span>
+                    <h3 class="font-bold text-white text-lg mb-2">Session 8: Build Your Own AI Assistant</h3>
+                    <p class="text-sm text-slate-300">Make sure you can open Projects in your Claude account.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="w-full glass-panel border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 shrink-0">
+        <button id="prev-btn" onclick="prevSlide()" class="px-4 py-2 rounded-xl glass-card hover:bg-white/10 text-slate-200 text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+
+        <div id="slide-dots" class="hidden md:flex items-center gap-1.5 overflow-x-auto max-w-[50vw] px-2 py-1"></div>
+
+        <button id="next-btn" onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+            Next <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <!-- Custom Toast Notification for Copy action -->
+    <div id="copy-toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-emerald-500/90 text-white px-4 py-2 rounded-full text-xs font-bold opacity-0 transition-opacity duration-300 z-50 pointer-events-none shadow-lg shadow-emerald-500/20 flex items-center gap-2 border border-emerald-400/50">
+        <i class="fa-solid fa-circle-check"></i> Copied to clipboard!
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 19;
+        let sidebarOpen = true;
+
+        function updateSlideUI() {
+            // Hide all slides
+            for (let i = 0; i < totalSlides; i++) {
+                const slide = document.getElementById(`slide-${i}`);
+                if (slide) {
+                    slide.classList.add('hidden');
+                    slide.classList.remove('slide-active');
+                }
+                const navItem = document.getElementById(`nav-item-${i}`);
+                if (navItem) {
+                    navItem.classList.remove('nav-item-active');
+                }
+            }
+
+            // Show current slide
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) {
+                activeSlide.classList.remove('hidden');
+                setTimeout(() => {
+                    activeSlide.classList.add('slide-active');
+                }, 10);
+            }
+
+            // Activate nav item
+            const activeNav = document.getElementById(`nav-item-${currentSlide}`);
+            if (activeNav) {
+                activeNav.classList.add('nav-item-active');
+                // Scroll nav into view if needed
+                activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Update top bar numbers
+            document.getElementById('current-slide-num').innerText = currentSlide + 1;
+            document.getElementById('total-slide-num').innerText = totalSlides;
+
+            // Update progress bar
+            const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Update Buttons
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.innerHTML = 'Session 7 Complete <i class="fa-solid fa-check ml-1"></i>';
+                nextBtn.classList.remove('from-cyan-500', 'to-blue-600');
+                nextBtn.classList.add('from-emerald-500', 'to-emerald-600');
+            } else {
+                nextBtn.innerHTML = 'Next <i class="fa-solid fa-arrow-right ml-1"></i>';
+                nextBtn.classList.add('from-cyan-500', 'to-blue-600');
+                nextBtn.classList.remove('from-emerald-500', 'to-emerald-600');
+            }
+
+            renderDots();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        function jumpToSlide(index) {
+            currentSlide = index;
+            updateSlideUI();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarOpen = !sidebarOpen;
+            if (!sidebarOpen) {
+                sidebar.classList.add('-ml-80');
+            } else {
+                sidebar.classList.remove('-ml-80');
+            }
+        }
+
+        function renderDots() {
+            const dotsContainer = document.getElementById('slide-dots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.onclick = () => jumpToSlide(i);
+                dot.className = `h-2 rounded-full transition-all ${
+                    i === currentSlide ? 'bg-cyan-400 w-5' : 'bg-white/20 hover:bg-white/40 w-2 shrink-0'
+                }`;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function copyCode(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            
+            // Temporary textarea to execute copy command safely
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            showToast();
+        }
+
+        let toastTimeout;
+        function showToast() {
+            const toast = document.getElementById('copy-toast');
+            toast.classList.remove('opacity-0');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // Keyboard Navigation setup
+        document.addEventListener('keydown', (e) => {
+            // Ignore if user is typing in an input (not applicable here, but good practice)
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') { // Space explicitly caught with ' '
+                e.preventDefault(); // Prevent default scroll for space
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize on load
+        window.onload = () => {
+            updateSlideUI();
+        };
+    </script>
+</body>
+</html>
