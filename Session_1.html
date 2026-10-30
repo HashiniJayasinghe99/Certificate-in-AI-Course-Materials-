@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAI01 - Session 1: AI Fundamentals: Responsible & Ethical AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#38bdf8',
+                            500: '#06b6d4',
+                            600: '#0284c7',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #080c14;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.20) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.22) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.18) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.18) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.70);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.70);
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(56, 189, 248, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+            backdrop-filter: blur(8px);
+        }
+        .glass-input:focus {
+            border-color: #38bdf8;
+            outline: none;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .slide-enter {
+            opacity: 0;
+            transform: scale(0.97) translateY(10px);
+            filter: blur(4px);
+        }
+        .slide-active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            border-left: 3px solid #38bdf8;
+            color: #ffffff !important;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.5); }
+    </style>
+</head>
+<body class="text-slate-100 font-sans h-full overflow-hidden flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <header class="w-full glass-panel border-b border-white/10 px-6 py-3 flex justify-between items-center z-50 relative shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="sidebar-toggle" onclick="toggleSidebar()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition-all flex items-center justify-center" title="Toggle Navigation">
+                <i class="fa-solid fa-bars-staggered text-lg"></i>
+            </button>
+            <div class="bg-gradient-to-tr from-cyan-500 via-blue-500 to-indigo-500 p-2 rounded-xl shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-base"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-xs md:text-sm text-white tracking-wide flex items-center gap-2">
+                    CAI01: Session 1 • AI Fundamentals: Responsible & Ethical AI
+                </h1>
+                <p class="text-[11px] text-slate-400">Lecturer: Ms Hashini Jayasinghe • Master Class Deck</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 rounded-full text-xs font-semibold glass-panel border border-cyan-500/30 text-cyan-300">
+                Session 1 (2 Hours)
+            </div>
+            <div class="glass-panel border border-white/10 px-3 py-1 rounded-full text-xs font-mono text-cyan-400">
+                <span id="current-slide-num" class="text-white font-bold">1</span> / <span id="total-slide-num">20</span>
+            </div>
+            <button onclick="toggleFullScreen()" class="p-2 rounded-xl glass-card hover:bg-white/10 text-slate-300 transition" title="Toggle Fullscreen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full h-[2px] bg-white/5">
+            <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-500 h-full w-0 transition-all duration-500 ease-out"></div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+        <aside id="sidebar" class="w-80 glass-panel border-r border-white/10 flex flex-col justify-between transition-all duration-300 ease-in-out z-40 shrink-0">
+            <div class="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-130px)]">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 flex justify-between items-center">
+                    <span>Session 1 Curriculum</span>
+                    <span class="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">20 Slides</span>
+                </div>
+
+                <div class="space-y-1">
+                    <button id="nav-item-0" onclick="jumpToSlide(0)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-door-open w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">01. Welcome and warm-up</span>
+                    </button>
+                    <button id="nav-item-1" onclick="jumpToSlide(1)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-question w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">02. What is AI?</span>
+                    </button>
+                    <button id="nav-item-2" onclick="jumpToSlide(2)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-layer-group w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">03. AI, ML, Gen AI</span>
+                    </button>
+                    <button id="nav-item-3" onclick="jumpToSlide(3)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-forward-fast w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">04. Learn, then predict</span>
+                    </button>
+                    <button id="nav-item-4" onclick="jumpToSlide(4)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-list-ol w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">05. The 5-part formula</span>
+                    </button>
+                    <button id="nav-item-5" onclick="jumpToSlide(5)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-laptop-code w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">06. Live demo</span>
+                    </button>
+                    <button id="nav-item-6" onclick="jumpToSlide(6)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-scale-unbalanced w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">07. Strengths and limits</span>
+                    </button>
+                    <button id="nav-item-7" onclick="jumpToSlide(7)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-traffic-light w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">08. Traffic-light guide</span>
+                    </button>
+                    <button id="nav-item-8" onclick="jumpToSlide(8)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-vial-circle-check w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">09. Activity 1</span>
+                    </button>
+                    <button id="nav-item-9" onclick="jumpToSlide(9)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-box-open w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">10. Choosing the right AI</span>
+                    </button>
+                    <button id="nav-item-10" onclick="jumpToSlide(10)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-rocket w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">11. Learn AI fast</span>
+                    </button>
+                    <button id="nav-item-11" onclick="jumpToSlide(11)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-scale-balanced w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">12. Responsible AI & bias</span>
+                    </button>
+                    <button id="nav-item-12" onclick="jumpToSlide(12)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-user-shield w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">13. Privacy</span>
+                    </button>
+                    <button id="nav-item-13" onclick="jumpToSlide(13)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-copyright w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">14. Copyright and honesty</span>
+                    </button>
+                    <button id="nav-item-14" onclick="jumpToSlide(14)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-plane-slash w-4 text-center text-purple-400"></i>
+                        <span class="truncate font-medium">15. Mini case</span>
+                    </button>
+                    <button id="nav-item-15" onclick="jumpToSlide(15)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-medal w-4 text-center text-pink-400"></i>
+                        <span class="truncate font-medium">16. The 5 Golden Rules</span>
+                    </button>
+                    <button id="nav-item-16" onclick="jumpToSlide(16)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-hammer w-4 text-center text-amber-400"></i>
+                        <span class="truncate font-medium">17. Activity 2</span>
+                    </button>
+                    <button id="nav-item-17" onclick="jumpToSlide(17)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-box-archive w-4 text-center text-emerald-400"></i>
+                        <span class="truncate font-medium">18. What we covered</span>
+                    </button>
+                    <button id="nav-item-18" onclick="jumpToSlide(18)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-calendar-check w-4 text-center text-cyan-400"></i>
+                        <span class="truncate font-medium">19. This week's challenge</span>
+                    </button>
+                    <button id="nav-item-19" onclick="jumpToSlide(19)" class="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/5 transition flex items-center gap-2.5">
+                        <i class="fa-solid fa-comments w-4 text-center text-indigo-400"></i>
+                        <span class="truncate font-medium">20. Questions</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-white/10 glass-card m-3 rounded-xl text-center shrink-0">
+                <p class="text-[11px] text-slate-300 font-semibold">CAI01 - Session 1</p>
+                <div class="flex justify-center items-center gap-2 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="text-[10px] text-cyan-400 font-medium">AI Fundamentals</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 relative p-4 md:p-8 flex items-center justify-center overflow-y-auto pb-16">
+
+            <!-- SLIDE 1 (Index 0): Welcome and warm-up -->
+            <section id="slide-0" class="slide-active w-full max-w-5xl space-y-6">
+                <div class="text-center space-y-3 max-w-3xl mx-auto">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold glass-panel border border-cyan-400/30 text-cyan-300 shadow-lg">
+                        <i class="fa-solid fa-door-open"></i> Session 1 • 2 Hours
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-slate-300 leading-tight">
+                        Welcome and warm-up
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-cyan-400">
+                        <div class="w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold mb-3"><i class="fa-solid fa-bullseye"></i></div>
+                        <h3 class="font-bold text-white text-sm">CAI01 Goal</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">Understand AI, try it, use it safely. No technical background needed.</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-indigo-400">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold mb-3"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h3 class="font-bold text-white text-sm">Ground Rule</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">No confidential or personal data in any tool today.</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-purple-400">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold mb-3"><i class="fa-solid fa-comments"></i></div>
+                        <h3 class="font-bold text-white text-sm">Ask in Pairs</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">Where did you use AI this week? Then a show of hands: daily, sometimes, never.</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-600 text-center text-slate-200 font-semibold mt-4 shadow-lg italic">
+                    "Everyone is at a different level, and that is fine."
+                </div>
+            </section>
+
+            <!-- SLIDE 2 (Index 1): What is AI? (in plain words) -->
+            <section id="slide-1" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Concept</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">What is AI? (in plain words)</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Analogy</h3>
+                            <i class="fa-solid fa-user-graduate text-slate-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300 italic flex-1">"Think of an intern who has read millions of documents but has never worked in your office."</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-t-2 border-t-indigo-400">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">AI</h3>
+                            <i class="fa-solid fa-microchip text-indigo-400"></i>
+                        </div>
+                        <div class="space-y-3 text-sm text-slate-300">
+                            <p>Software that learns patterns from many examples, then predicts or creates.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass-panel p-4 rounded-xl flex items-start gap-3 border-l-4 border-l-rose-400">
+                        <i class="fa-solid fa-robot text-rose-400 mt-1"></i>
+                        <p class="text-sm text-slate-200">It does not think or understand like a person.</p>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl flex items-start gap-3 border-l-4 border-l-cyan-400">
+                        <i class="fa-solid fa-mobile-screen text-cyan-400 mt-1"></i>
+                        <p class="text-sm text-slate-200">You already use it: spam filters, maps, bank fraud alerts, streaming suggestions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3 (Index 2): AI, machine learning, generative AI -->
+            <section id="slide-2" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Definitions</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">AI, machine learning, generative AI</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4 border-l-4 border-l-blue-400">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-network-wired"></i></div>
+                        <div>
+                            <strong class="text-white block mb-1">AI</strong>
+                            <p class="text-sm text-slate-300">The big idea.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4 border-l-4 border-l-emerald-400">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div>
+                            <strong class="text-white block mb-1">Machine learning</strong>
+                            <p class="text-sm text-slate-300">AI that learns from examples, such as fraud detection.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4 border-l-4 border-l-amber-400">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <div>
+                            <strong class="text-white block mb-1">Generative AI</strong>
+                            <p class="text-sm text-slate-300">Creates new text, images or audio, like ChatGPT, Gemini, Copilot and Claude.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-xl border border-purple-500/30 bg-purple-900/10">
+                    <h4 class="font-bold text-purple-300 text-sm mb-3">Quick Poll: AI or not AI?</h4>
+                    <ul class="flex flex-wrap justify-center gap-4 text-sm font-medium text-slate-200">
+                        <li class="px-3 py-1.5 bg-slate-800 rounded-lg">Calculator</li>
+                        <li class="px-3 py-1.5 bg-slate-800 rounded-lg">Excel SUM</li>
+                        <li class="px-3 py-1.5 bg-slate-800 rounded-lg">Spam filter</li>
+                        <li class="px-3 py-1.5 bg-slate-800 rounded-lg">Chatbot</li>
+                    </ul>
+                </div>
+
+                <div class="text-center p-3 rounded-lg bg-white/5 text-xs text-slate-400 italic border border-white/10">
+                    "Fixed rules are not AI. Learned patterns are."
+                </div>
+            </section>
+
+            <!-- SLIDE 4 (Index 3): How AI works: learn, then predict -->
+            <section id="slide-3" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400">How It Works</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">How AI works: learn, then predict</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-t-2 border-t-indigo-400">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Learn</h3>
+                            <i class="fa-solid fa-book-open-reader text-indigo-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300">It is trained on huge amounts of text, so it learns patterns, not a filing cabinet of facts.</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-t-2 border-t-cyan-400">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Predict</h3>
+                            <i class="fa-solid fa-pen-nib text-cyan-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300">It writes one word at a time, like phone autocomplete on a far bigger scale.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-xl space-y-3">
+                    <h3 class="font-bold text-white text-sm">The Result</h3>
+                    <ul class="text-sm text-slate-200 space-y-2 list-disc pl-5 marker:text-pink-400">
+                        <li>Fluent text that sounds sure, whether or not it is true.</li>
+                        <li>Its knowledge stops at a training date unless the tool searches the web.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 5 (Index 4): Your prompt matters: the 5-part formula -->
+            <section id="slide-4" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Framework</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Your prompt matters: the 5-part formula</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-cyan-300 bg-cyan-900/30 px-1.5 py-0.5 rounded w-fit border border-cyan-500/30">Role</span>
+                        <h3 class="font-bold text-white text-sm">Role</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">Who should it act as?</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-indigo-300 bg-indigo-900/30 px-1.5 py-0.5 rounded w-fit border border-indigo-500/30">Task</span>
+                        <h3 class="font-bold text-white text-sm">Task</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">What do you want?</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-amber-300 bg-amber-900/30 px-1.5 py-0.5 rounded w-fit border border-amber-500/30">Context</span>
+                        <h3 class="font-bold text-white text-sm">Context</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">Who is it for?</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col">
+                        <span class="text-[9px] font-mono text-emerald-300 bg-emerald-900/30 px-1.5 py-0.5 rounded w-fit border border-emerald-500/30">Format</span>
+                        <h3 class="font-bold text-white text-sm">Format</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">Length and layout.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 flex flex-col border-t-2 border-t-rose-400">
+                        <span class="text-[9px] font-mono text-rose-300 bg-rose-900/30 px-1.5 py-0.5 rounded w-fit border border-rose-500/30">Limits</span>
+                        <h3 class="font-bold text-white text-sm">Limits</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed flex-1">What to avoid or keep inside.</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-600 text-center text-slate-200 font-semibold mt-4 shadow-lg italic border-l-4 border-l-amber-400">
+                    "Brief it like a new colleague. A vague brief gets a vague answer."
+                </div>
+            </section>
+
+            <!-- SLIDE 6 (Index 5): Live demo: weak vs strong prompt -->
+            <section id="slide-5" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Lecturer Demo</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Live demo: weak vs strong prompt</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-t-slate-500 flex flex-col">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Weak prompt</span>
+                        <div class="relative glass-input rounded-xl p-4 border border-white/10 flex-grow group">
+                            <button onclick="copyCode('weak-prompt')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="weak-prompt" class="font-mono text-sm text-slate-300 whitespace-pre-wrap pr-10">Write an email about the meeting.</pre>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3 border-t-2 border-t-emerald-400 flex flex-col shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Strong prompt</span>
+                        <div class="relative glass-input rounded-xl p-4 border border-emerald-500/20 flex-grow group">
+                            <button onclick="copyCode('strong-prompt')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="strong-prompt" class="font-mono text-sm text-emerald-100 whitespace-pre-wrap pr-10">You are an HR officer. Write a friendly 120-word email reminding staff about Friday's 10 a.m. meeting in Conference Room B. Agenda: budget update and new leave policy. Include a subject line.</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl text-center space-y-2 mt-4 bg-emerald-900/10 border border-emerald-500/20">
+                    <p class="text-sm font-semibold text-white"><i class="fa-regular fa-eye mr-2 text-emerald-400"></i> Run both on screen. Ask: which parts of the formula made the difference?</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 7 (Index 6): Strengths and limits -->
+            <section id="slide-6" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Capabilities</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Strengths and limits</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Analogy</h3>
+                            <i class="fa-solid fa-user-graduate text-slate-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300 italic flex-1">"A brilliant, overconfident intern who rarely says 'I don't know'."</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-l-4 border-l-cyan-400">
+                        <h3 class="font-bold text-white text-sm">Strengths</h3>
+                        <p class="text-sm text-slate-300">First drafts, summaries, brainstorming, rewording, explaining hard ideas simply.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4 border-t-2 border-t-rose-400">
+                        <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-ghost"></i></div>
+                        <div>
+                            <strong class="text-white block text-sm mb-1">Hallucinations</strong>
+                            <p class="text-xs text-slate-300">Confident answers that are wrong or invented.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4 border-t-2 border-t-orange-400">
+                        <div class="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div>
+                            <strong class="text-white block text-sm mb-1">Also limits:</strong>
+                            <p class="text-xs text-slate-300">Out-of-date information, bias from its training data, and no knowledge of your organisation.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8 (Index 7): Traffic-light guide and the spot-check habit -->
+            <section id="slide-7" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Risk Framework</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Traffic-light guide and the spot-check habit</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Green -->
+                    <div class="glass-card p-6 rounded-2xl border-t-4 border-t-emerald-500 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-check"></i></div>
+                        <h3 class="font-bold text-white mb-2">Green</h3>
+                        <p class="text-sm text-slate-300">Brainstorming, rewording, drafts.</p>
+                    </div>
+
+                    <!-- Amber -->
+                    <div class="glass-card p-6 rounded-2xl border-t-4 border-t-amber-500 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-minus"></i></div>
+                        <h3 class="font-bold text-white mb-2">Amber</h3>
+                        <p class="text-sm text-slate-300">Facts, numbers, legal or medical content, so verify everything.</p>
+                    </div>
+
+                    <!-- Red -->
+                    <div class="glass-card p-6 rounded-2xl border-t-4 border-t-rose-500 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-xmark"></i></div>
+                        <h3 class="font-bold text-white mb-2">Red</h3>
+                        <p class="text-sm text-slate-300">Decisions about people, confidential data, final sign-off, which stay with humans.</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-800/80 rounded-xl border border-white/10 text-center text-sm font-semibold text-slate-200">
+                    <span class="text-indigo-400">Before you trust it, ask:</span> Can I check it? What if it is wrong? Who is accountable? (You are.)
+                </div>
+
+                <div class="p-4 rounded-xl bg-rose-900/10 border border-rose-500/20 text-sm text-rose-200 text-center">
+                    <i class="fa-solid fa-gavel text-rose-400 mr-2"></i> In 2023, New York lawyers were fined $5,000 for submitting case citations that ChatGPT invented.
+                </div>
+            </section>
+
+            <!-- SLIDE 9 (Index 8): Activity 1, Test the AI -->
+            <section id="slide-8" class="hidden slide-enter w-full max-w-5xl space-y-4">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Activity</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Activity 1, Test the AI</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-white/20 text-slate-300">
+                            <i class="fa-regular fa-clock mr-1"></i> Part A 5 min, Part B 6 min, Debrief 4 min
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-purple-500/30 text-purple-300">
+                            <i class="fa-regular fa-clock mr-1"></i> 15 min
+                        </span>
+                    </div>
+                </div>
+
+                <p class="text-sm text-slate-300 italic">Work in pairs and pick one tool: Gemini, Copilot, Claude or ChatGPT.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    <!-- Part A -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-emerald-400">
+                        <h3 class="text-xs font-bold text-emerald-300 uppercase tracking-widest mb-2">Part A - Strength test</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-2">
+                            <button onclick="copyCode('prompt-a')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-a" class="font-mono text-[11px] text-slate-200 whitespace-pre-wrap pt-1 pr-10 overflow-y-auto max-h-40">Summarise the memo below in 3 bullet points for a busy manager, then list every date in a small table. Memo: "Greenfield Supplies will move its monthly stock count to the first Monday of each month from November. Branch managers must submit count sheets by 5 p.m. that Monday. Training runs on 28 and 29 October at 10 a.m. in the main conference room."</pre>
+                        </div>
+                    </div>
+
+                    <!-- Part B -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-rose-400">
+                        <h3 class="text-xs font-bold text-rose-300 uppercase tracking-widest mb-2">Part B - Trap test</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-2">
+                            <button onclick="copyCode('prompt-b')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="prompt-b" class="font-mono text-[11px] text-slate-200 whitespace-pre-wrap pt-1 pr-10 overflow-y-auto max-h-40">Give me three published research studies, with authors, year, journal and link, showing that four-day work weeks improve productivity in call centres.</pre>
+                        </div>
+                        <p class="text-xs text-slate-300">Then search for each reference online and mark it real, partly right or invented.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl border border-white/10 mt-2">
+                    <strong class="text-purple-300 text-sm block mb-1">Debrief</strong>
+                    <p class="text-sm text-slate-200">How many could you verify? Did it sound confident? What check will you add to your own work?</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 10 (Index 9): Choosing the right AI -->
+            <section id="slide-9" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Tool Selection</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Choosing the right AI</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <p class="text-sm text-slate-200"><i class="fa-solid fa-circle-check text-pink-400 mr-2"></i> No single best tool. Choose by task, not by brand, and test with your own task.</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-2xl space-y-3 border border-white/10 bg-slate-800/50">
+                        <h3 class="font-bold text-white text-sm">Ask four questions:</h3>
+                        <ul class="text-sm text-slate-300 space-y-2 list-disc pl-5 marker:text-pink-400">
+                            <li>What is the task?</li>
+                            <li>Where does my work live?</li>
+                            <li>How sensitive is the data?</li>
+                            <li>What if it is wrong?</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl overflow-hidden border border-white/10 mb-4">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-900/80 border-b border-white/10">
+                            <tr>
+                                <th class="px-5 py-3 font-semibold text-pink-300">Tool</th>
+                                <th class="px-5 py-3 font-semibold text-slate-300">Good starting use</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5 text-xs">
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="px-5 py-3 text-white font-medium">Copilot</td>
+                                <td class="px-5 py-3 text-slate-300">Outlook, Word, Teams, if your organisation licenses it</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="px-5 py-3 text-white font-medium">Gemini</td>
+                                <td class="px-5 py-3 text-slate-300">Gmail, Docs, Sheets, Drive</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="px-5 py-3 text-white font-medium">Claude</td>
+                                <td class="px-5 py-3 text-slate-300">Long documents, careful writing</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="px-5 py-3 text-white font-medium">ChatGPT</td>
+                                <td class="px-5 py-3 text-slate-300">Flexible all-rounder for ideas and drafts</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center p-3 rounded-lg bg-pink-900/10 text-sm text-pink-200 italic border border-pink-500/20">
+                    "For important work, try two tools and compare."
+                </div>
+            </section>
+
+            <!-- SLIDE 11 (Index 10): Learn AI fast and keep it a helper -->
+            <section id="slide-10" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Skill Building</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Learn AI fast and keep it a helper</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 mb-2"><i class="fa-solid fa-stopwatch text-lg"></i></div>
+                        <p class="text-sm text-slate-300">Practise 15 minutes a day on a real task, and keep a prompt library</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 mb-2"><i class="fa-solid fa-arrows-rotate text-lg"></i></div>
+                        <p class="text-sm text-slate-300">Improve results with follow-ups: "shorter", "more formal", "give me three options"</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 mb-2"><i class="fa-solid fa-rotate text-lg"></i></div>
+                        <p class="text-sm text-slate-300">The loop: you set the goal, AI drafts, you check, you decide</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4 border-l-4 border-l-amber-400 max-w-2xl mx-auto">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Analogy</h3>
+                            <i class="fa-solid fa-user-check text-slate-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300 italic flex-1">"AI changes tasks. Your judgement, checking and people skills are your advantage."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 12 (Index 11): Why responsible AI matters, and bias -->
+            <section id="slide-11" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Ethics & Safety</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Why responsible AI matters, and bias</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-gauge-high"></i></div>
+                        <p class="text-sm text-slate-200 mt-2">AI speeds up good work and also speeds up mistakes. You, not the tool, are accountable.</p>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-scale-unbalanced"></i></div>
+                        <p class="text-sm text-slate-200 mt-2">AI learns from human data, so it can copy human unfairness.</p>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-xl border border-rose-500/30 bg-rose-900/10">
+                        <p class="text-sm text-slate-300"><i class="fa-solid fa-newspaper text-rose-400 mr-2"></i> Reuters reported in 2018 that Amazon dropped an experimental recruiting tool that downgraded CVs mentioning women's activities.</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-800/80 border-l-4 border-l-emerald-400 text-slate-200 text-sm shadow-lg font-bold text-center">
+                        Never let AI alone decide about hiring, pay, grades or care.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 13 (Index 12): Privacy and confidentiality -->
+            <section id="slide-12" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Ethics & Safety</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Privacy and confidentiality</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col space-y-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">Analogy</h3>
+                            <i class="fa-solid fa-envelope-open-text text-slate-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300 italic flex-1">"Treat free public tools like a postcard, not a sealed envelope."</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-t-2 border-t-cyan-400">
+                        <ul class="text-sm text-slate-200 space-y-3">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-ban text-rose-400 mt-1"></i> Do not paste personal, client, patient or financial data into unapproved tools.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-user-ninja text-cyan-400 mt-1"></i> Anonymise first, and follow your organisation's policy.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-cyan-900/10 border border-cyan-500/30 text-center text-cyan-200 font-semibold shadow-[0_0_15px_rgba(6,182,212,0.15)] max-w-xl mx-auto">
+                    <i class="fa-solid fa-clipboard-question mr-2"></i> Test: "Would I pin this on the office noticeboard?"
+                </div>
+            </section>
+
+            <!-- SLIDE 14 (Index 13): Copyright and honesty -->
+            <section id="slide-13" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Ethics & Safety</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Copyright and honesty</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-copy"></i></div>
+                        <p class="text-sm text-slate-200 mt-2">Do not publish AI text untouched, since it may resemble existing work.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-pen-nib"></i></div>
+                        <p class="text-sm text-slate-200 mt-2">Rewrite in your own voice, and cite real sources you have checked yourself.</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl flex items-start gap-4 border-l-4 border-l-indigo-400">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-bullhorn"></i></div>
+                        <p class="text-sm text-slate-200 mt-2">Say when you used AI if your policy or clients expect it.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 15 (Index 14): Mini case: the airline chatbot -->
+            <section id="slide-14" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Case Study</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Mini case: the airline chatbot</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl space-y-4 border-l-4 border-l-purple-500">
+                        <h3 class="font-bold text-white border-b border-white/10 pb-2">The Facts</h3>
+                        <ul class="text-sm text-slate-300 space-y-3 list-disc pl-5 marker:text-purple-400">
+                            <li>In 2022, Air Canada's website chatbot told a grieving customer he could claim a bereavement discount after travel. This was wrong.</li>
+                            <li>In 2024 a Canadian tribunal held the airline responsible and ordered it to pay him C$812.02.</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl space-y-4 border border-white/10 bg-slate-800/50">
+                        <h3 class="font-bold text-white border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-regular fa-comments text-purple-400"></i> Discussion</h3>
+                        <ul class="text-sm text-slate-200 space-y-3">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-question text-purple-400 mt-1"></i> What went wrong?</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-question text-purple-400 mt-1"></i> Who is accountable?</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-question text-purple-400 mt-1"></i> What would you have checked?</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 16 (Index 15): The 5 Golden Rules -->
+            <section id="slide-15" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Framework</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">The 5 Golden Rules</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    <!-- Rule 1 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-emerald-400">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center">1</div>
+                        <h3 class="font-bold text-white text-sm">Protect</h3>
+                        <p class="text-xs text-slate-300">No confidential or personal data in unapproved tools.</p>
+                    </div>
+                    <!-- Rule 2 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-cyan-400">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center">2</div>
+                        <h3 class="font-bold text-white text-sm">Verify</h3>
+                        <p class="text-xs text-slate-300">Check facts, figures, names and sources.</p>
+                    </div>
+                    <!-- Rule 3 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+                        <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center">3</div>
+                        <h3 class="font-bold text-white text-sm">Own it</h3>
+                        <p class="text-xs text-slate-300">You are accountable, and humans decide on people.</p>
+                    </div>
+                    <!-- Rule 4 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-purple-400">
+                        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center">4</div>
+                        <h3 class="font-bold text-white text-sm">Disclose</h3>
+                        <p class="text-xs text-slate-300">Be open about AI use where it matters.</p>
+                    </div>
+                    <!-- Rule 5 -->
+                    <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-pink-400">
+                        <div class="w-8 h-8 rounded-full bg-pink-500/20 text-pink-400 font-bold flex items-center justify-center">5</div>
+                        <h3 class="font-bold text-white text-sm">Be fair</h3>
+                        <p class="text-xs text-slate-300">Look for bias and respect copyright.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 17 (Index 16): Activity 2, Build your own prompt -->
+            <section id="slide-16" class="hidden slide-enter w-full max-w-5xl space-y-4">
+                <div class="border-b border-white/10 pb-3 flex justify-between items-end">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Activity</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Activity 2, Build your own prompt</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest glass-panel border border-amber-500/30 text-amber-300">
+                        <i class="fa-regular fa-clock mr-1"></i> 12 min
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-white text-sm border-b border-white/10 pb-2">Steps</h3>
+                        <ol class="text-sm text-slate-200 space-y-2 list-decimal pl-5 marker:text-amber-400 font-medium">
+                            <li>Pick a task from your own job. Use made-up details only.</li>
+                            <li>Write a 5-part prompt and run it (4 min).</li>
+                            <li>Improve it with a follow-up: <em>Make it shorter and more formal.</em> or <em>List anything I should double-check.</em> (3 min)</li>
+                            <li>Check the result against the Golden Rules, and underline three things to verify (3 min).</li>
+                            <li>Tell your partner one thing AI did well and one thing you had to fix (2 min).</li>
+                        </ol>
+                        <p class="text-xs text-slate-400 italic mt-3"><i class="fa-solid fa-file-lines text-amber-400 mr-1"></i> Activity prompts are on your handout or in the shared chat.</p>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl flex flex-col h-full border-t-2 border-t-amber-400">
+                        <h3 class="text-xs font-bold text-amber-300 uppercase tracking-widest mb-2">Sample starter prompt (HR)</h3>
+                        <div class="relative glass-input rounded-lg p-3 border border-white/10 flex-grow mb-2">
+                            <button onclick="copyCode('sample-prompt')" class="absolute top-2 right-2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-semibold transition z-10">Copy</button>
+                            <pre id="sample-prompt" class="font-mono text-[10px] text-slate-200 whitespace-pre-wrap pt-1 pr-10 overflow-y-auto max-h-48">You are an experienced HR officer. Write a job description for a Customer Service Executive at a mid-sized retail company. Context: handles phone and email queries, reports to the Customer Service Manager, needs 1-2 years' experience. Format: short intro, six responsibilities, five requirements. Limits: under 250 words, plain language, no gender-specific words.</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 18 (Index 17): What we covered -->
+            <section id="slide-17" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Summary</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">What we covered</h2>
+                </div>
+
+                <div class="space-y-4 max-w-3xl mx-auto">
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <i class="fa-solid fa-check text-emerald-400 text-lg"></i>
+                        <span class="text-sm text-slate-200">AI finds patterns and generates text. It does not look things up or truly understand.</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <i class="fa-solid fa-check text-emerald-400 text-lg"></i>
+                        <span class="text-sm text-slate-200">Great for drafts, summaries and ideas, but verify the rest.</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3">
+                        <i class="fa-solid fa-check text-emerald-400 text-lg"></i>
+                        <span class="text-sm text-slate-200">Pick tools by task, data sensitivity and where you work.</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-3 border-l-4 border-emerald-400">
+                        <i class="fa-solid fa-check text-emerald-400 text-lg"></i>
+                        <span class="text-sm text-slate-200 font-semibold">Use AI to augment yourself, and keep the 5 Golden Rules.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 19 (Index 18): This week's challenge -->
+            <section id="slide-18" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 text-center">
+                    <i class="fa-solid fa-calendar-check text-3xl text-cyan-400 mb-3 block"></i>
+                    <h2 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">This week's challenge</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div class="glass-card p-6 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-2"><i class="fa-solid fa-bolt"></i></div>
+                        <p class="text-sm text-slate-200 font-medium">Use AI on one real, non-confidential task each day.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl flex flex-col items-center text-center space-y-3 border-t-2 border-t-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.1)]">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-2"><i class="fa-solid fa-book-bookmark"></i></div>
+                        <p class="text-sm text-slate-200 font-medium">Save your three best prompts.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl flex flex-col items-center text-center space-y-3">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-2"><i class="fa-solid fa-file-shield"></i></div>
+                        <p class="text-sm text-slate-200 font-medium">Find your organisation's AI policy.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 20 (Index 19): Questions -->
+            <section id="slide-19" class="hidden slide-enter w-full max-w-5xl space-y-6">
+                <div class="border-b border-white/10 pb-3 text-center">
+                    <i class="fa-solid fa-comments text-3xl text-indigo-400 mb-3 block"></i>
+                    <h2 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-white">Questions</h2>
+                </div>
+
+                <div class="glass-panel p-8 rounded-2xl max-w-2xl mx-auto text-center border border-indigo-500/30 bg-indigo-900/10 shadow-[0_0_20px_rgba(99,102,241,0.1)] mb-8">
+                    <h3 class="font-bold text-white text-xl flex justify-center items-center gap-2"><i class="fa-solid fa-person-circle-question text-indigo-400"></i> Open Q&A for 5 minutes</h3>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl max-w-2xl mx-auto text-center border-t-2 border-t-cyan-400">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-2 block">Coming Up Next Session</span>
+                    <p class="text-sm text-slate-300 font-medium">Preview the next session: getting better results with prompts</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="w-full glass-panel border-t border-white/10 px-6 py-3 flex justify-between items-center z-50 shrink-0">
+        <button id="prev-btn" onclick="prevSlide()" class="px-4 py-2 rounded-xl glass-card hover:bg-white/10 text-slate-200 text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+
+        <div id="slide-dots" class="hidden md:flex items-center gap-1.5 overflow-x-auto max-w-[50vw] px-2 py-1"></div>
+
+        <button id="next-btn" onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+            Next <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <!-- Custom Toast Notification for Copy action -->
+    <div id="copy-toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-emerald-500/90 text-white px-4 py-2 rounded-full text-xs font-bold opacity-0 transition-opacity duration-300 z-50 pointer-events-none shadow-lg shadow-emerald-500/20 flex items-center gap-2 border border-emerald-400/50">
+        <i class="fa-solid fa-circle-check"></i> Copied to clipboard!
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 20;
+        let sidebarOpen = true;
+
+        function updateSlideUI() {
+            // Hide all slides
+            for (let i = 0; i < totalSlides; i++) {
+                const slide = document.getElementById(`slide-${i}`);
+                if (slide) {
+                    slide.classList.add('hidden');
+                    slide.classList.remove('slide-active');
+                }
+                const navItem = document.getElementById(`nav-item-${i}`);
+                if (navItem) {
+                    navItem.classList.remove('nav-item-active');
+                }
+            }
+
+            // Show current slide
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) {
+                activeSlide.classList.remove('hidden');
+                setTimeout(() => {
+                    activeSlide.classList.add('slide-active');
+                }, 10);
+            }
+
+            // Activate nav item
+            const activeNav = document.getElementById(`nav-item-${currentSlide}`);
+            if (activeNav) {
+                activeNav.classList.add('nav-item-active');
+                // Scroll nav into view if needed
+                activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Update top bar numbers
+            document.getElementById('current-slide-num').innerText = currentSlide + 1;
+            document.getElementById('total-slide-num').innerText = totalSlides;
+
+            // Update progress bar
+            const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Update Buttons
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.innerHTML = 'Session 1 Complete <i class="fa-solid fa-check ml-1"></i>';
+                nextBtn.classList.remove('from-cyan-500', 'to-blue-600');
+                nextBtn.classList.add('from-emerald-500', 'to-emerald-600');
+            } else {
+                nextBtn.innerHTML = 'Next <i class="fa-solid fa-arrow-right ml-1"></i>';
+                nextBtn.classList.add('from-cyan-500', 'to-blue-600');
+                nextBtn.classList.remove('from-emerald-500', 'to-emerald-600');
+            }
+
+            renderDots();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        function jumpToSlide(index) {
+            currentSlide = index;
+            updateSlideUI();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarOpen = !sidebarOpen;
+            if (!sidebarOpen) {
+                sidebar.classList.add('-ml-80');
+            } else {
+                sidebar.classList.remove('-ml-80');
+            }
+        }
+
+        function renderDots() {
+            const dotsContainer = document.getElementById('slide-dots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.onclick = () => jumpToSlide(i);
+                dot.className = `h-2 rounded-full transition-all ${
+                    i === currentSlide ? 'bg-cyan-400 w-5' : 'bg-white/20 hover:bg-white/40 w-2 shrink-0'
+                }`;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function copyCode(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            
+            // Temporary textarea to execute copy command safely
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            showToast();
+        }
+
+        let toastTimeout;
+        function showToast() {
+            const toast = document.getElementById('copy-toast');
+            toast.classList.remove('opacity-0');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // Keyboard Navigation setup
+        document.addEventListener('keydown', (e) => {
+            // Ignore if user is typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') { // Space explicitly caught with ' '
+                e.preventDefault(); // Prevent default scroll for space
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize on load
+        window.onload = () => {
+            updateSlideUI();
+        };
+    </script>
+</body>
+</html>
